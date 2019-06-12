@@ -3,6 +3,8 @@ namespace AutoBlankMapBuilder
 {
     public static class CommonConstants
     {
+        public static readonly int ECODE_OK = 0;
+        public static readonly int ECODE_ERROR = -1;
         public static readonly int WAFER_MAX = 25;
 
         public static readonly string LOT_DAT_STRING = "LOT.DAT";

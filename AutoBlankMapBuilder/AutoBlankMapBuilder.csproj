@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EqpBinDataAccess">
+      <HintPath>..\..\..\..\EqpBinDataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -63,6 +66,9 @@
     </Compile>
     <Compile Include="CommonConstants.cs" />
     <Compile Include="Models\Config.cs" />
+    <Compile Include="Models\MapBuilder.cs" />
+    <Compile Include="Utils\CommonFunc.cs" />
+    <Compile Include="Utils\FileCopyClass.cs" />
     <Compile Include="Views\ConfigView.xaml.cs">
       <DependentUpon>ConfigView.xaml</DependentUpon>
     </Compile>
@@ -95,7 +101,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Utils\" />
     <Folder Include="ViewModels\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
