@@ -19,6 +19,14 @@ namespace AutoBlankMapBuilder.Models
 
         // DB
         public string MapBackupDb { get; set; }
+        public string DbUser { get; set; }
+        public string DbPwd { get; set; }
+        public string DbServer { get; set; }
+        public string DbName { get; set; }
+
+        public string OrderList { get; set; }
+
+        public string filePath { get; set; }
 
         public Config(string filename)
         {
@@ -39,6 +47,7 @@ namespace AutoBlankMapBuilder.Models
                 }
 
                 LoadConfigFile(filename);
+                filePath = Path.GetFullPath(filename);
             }
             catch (Exception ex)
             {
@@ -52,18 +61,64 @@ namespace AutoBlankMapBuilder.Models
             {
                 var doc = XDocument.Load(filename);
                 var server = doc.Element("Config").Element("Server");
-                AllDataDir = server.Element("AllDataDirectory").Value.ToString();
-                NewDataDir = server.Element("NewDataDirectory").Value.ToString();
-                BlankMapDir = server.Element("BlankMap").Value.ToString();
-                var win = new ConfigView();
-                win.TxtBlock1.Text = AllDataDir;
-                win.Show();
+                AllDataDir = server.Element("AllDataDirectory").Value;
+                NewDataDir = server.Element("NewDataDirectory").Value;
+                BlankMapDir = server.Element("BlankMap").Value;
+                var file = doc.Element("Config").Element("File");
+                OrderList = file.Element("OrderList").Value;
+                var db = doc.Element("Config").Element("DB").Element("MAP_BACKUP");
+                var conString = db.Element("ConnectionStrings").Value;
+                DbUser = Utils.Utils.GetItemString(conString, "User ID");
+                DbPwd = Utils.Utils.GetItemString(conString, "Password");
+                DbServer = Utils.Utils.GetItemString(conString, "Server");
+                DbName = Utils.Utils.GetItemString(conString, "Database");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
 
+        }
+
+        public void SaveConfigFile(ConfigView view, string fileName)
+        {
+            if (view.TBlockAllFolder.Text.Length <= 0)
+            {
+                return;
+            }
+
+            if (view.TBlockMapFolder.Text.Length <= 0)
+            {
+                return;
+            }
+
+            if (view.TBlockNewFolder.Text.Length <= 0)
+            {
+                return;
+            }
+
+            if (view.TBlockOrderList.Text.Length <= 0)
+            {
+                return;
+            }
+
+            try
+            {
+                var doc = XDocument.Load(fileName);
+                var server = doc.Element("Config").Element("Server");
+                server.Element("AllDataDirectory").Value = view.TBlockAllFolder.Text; 
+                server.Element("NewDataDirectory").Value = view.TBlockNewFolder.Text;
+                server.Element("BlankMap").Value = view.TBlockMapFolder.Text;
+                var file = doc.Element("Config").Element("File");
+                file.Element("OrderList").Value = view.TBlockOrderList.Text;
+
+                doc.Save(fileName);
+                LoadConfigFile(fileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }            
         }
 
         private void CreateDefaultXml(string filename)
@@ -81,6 +136,10 @@ namespace AutoBlankMapBuilder.Models
                             new XAttribute("Comment", "マップファイルを新規作成する際に元になるファイルが保管されているフォルダ"),
                             new XText("C:\\TMP\\BLANK_MAP"))
                         ),
+                    new XElement("File",
+                        new XElement("OrderList",
+                            new XAttribute("Comment", "投入リスト"),
+                            new XText("C:\\TMP\\TOUNYU\\T_LIST.xlsx"))),
                     new XElement("DB",
                         new XElement("MAP_BACKUP",
                             new XElement("ConnectionStrings",

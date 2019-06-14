@@ -7,6 +7,12 @@
         mc:Ignorable="d"
         Title="AutoBlankMapBuilder" Height="450" Width="800">
     <Grid>
+        <StackPanel>
+            <Button x:Name="Button1" Content="設定" Click="Button1_OnClick"></Button>
+            <Button x:Name="Button2" Content="作成" Click="Button2_OnClick"></Button>
+            <TextBox x:Name="LogText" AcceptsReturn="True" Height="300" Margin="5" VerticalScrollBarVisibility="Auto" BorderBrush="DimGray" BorderThickness="1" />
+            <Label x:Name="LabelText" Content="Label"/>
+        </StackPanel>
         
     </Grid>
 </Window>

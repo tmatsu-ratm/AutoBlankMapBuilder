@@ -9,8 +9,11 @@ namespace AutoBlankMapBuilder
 
         public static readonly string LOT_DAT_STRING = "LOT.DAT";
         public static readonly string WAFER_DAT_STRING = "W-NO-";
+        public static readonly string INS_ALL_FOLDER = "DATA000_投入"; 
 
         public static readonly string EXPLORER = "EXPLORER.EXE";
+
+        public static readonly string TMP_PATH = "../TMP";
 
         public static readonly string LOG_PATH = "../LOG";
         public static readonly string FILE_TYPE = ".log";
