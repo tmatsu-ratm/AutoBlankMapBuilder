@@ -34,6 +34,8 @@ namespace AutoBlankMapBuilder.Views
             Utils.Utils.WriteLog(this, "設定変更画面");
             ConfigView view = new ConfigView(cfg);
             view.ShowDialog();
+            AlarmView view2 = new AlarmView();
+            view2.ShowDialog();
         }
 
         private void Button2_OnClick(object sender, RoutedEventArgs e)
