@@ -20,4 +20,12 @@ namespace AutoBlankMapBuilder
         public static readonly uint FILE_MAX = 100;
         public static readonly uint FILE_SIZE = 5000000;
     }
+
+    public static class AlarmMessage
+    {
+        public static readonly string AMES_BLANK_MAP_UNKNOWN = "ブランクMAP登録なし";
+        public static readonly string AMES_INS_ALL_EXIST = "INS_ALLあり";
+        public static readonly string AMES_INS_NEW_EXIST = "INS_NEWあり";
+        public static readonly string AMES_NETWORK_ERROR = "ネットワークエラー";
+    }
 }

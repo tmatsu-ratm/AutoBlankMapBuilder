@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Windows.Controls;
 using Microsoft.Windows.Controls.Primitives;
+using AutoBlankMapBuilder.Models;
 
 namespace AutoBlankMapBuilder.Views
 {
@@ -23,11 +24,15 @@ namespace AutoBlankMapBuilder.Views
     /// </summary>
     public partial class AlarmView : Window
     {
-        public AlarmView()
+        private List<AlarmInfo> Alarms;
+
+        public AlarmView(List<AlarmInfo> alarms)
         {
             InitializeComponent();
             DataGrid dataGrid = new DataGrid();
             _grid.Children.Add(dataGrid);
+
+            Alarms = alarms;
 
             // 列ヘッダのスタイル
             Style style = new Style();
@@ -57,32 +62,11 @@ namespace AutoBlankMapBuilder.Views
 
             dataGrid.CanUserDeleteRows = true;
 
-            dataGrid.DataContext = new List<AlarmInfo>()
-            {
-                new AlarmInfo()
-                {
-                    Time = DateTime.Now, Department = "T661", OrderNo = "9AM8T-3631", Model = "BU3A251MN-8GBQY",
-                    StartDate = "20190605", Quantity = 25, Result = "ネットワークエラー"
-                },
-                new AlarmInfo()
-                {
-                    Time = DateTime.Now, Department = "T661", OrderNo = "9AM8T-3632", Model = "BUWT2416AX-8GTY",
-                    StartDate = "20190605", Quantity = 25, Result = "ブランクMAP登録なし"
-                },
-            };
+            dataGrid.Height = 300;
+
+            dataGrid.DataContext = Alarms;
             dataGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding());
         }
-    }
-
-    public class AlarmInfo
-    {
-        public DateTime Time { get; set; }
-        public string Department { get; set; }
-        public string OrderNo { get; set; }
-        public string Model { get; set; }
-        public string StartDate { get; set; }
-        public int Quantity { get; set; }
-        public string Result { get; set; }
     }
 }
 

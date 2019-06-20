@@ -18,6 +18,7 @@ namespace AutoBlankMapBuilder.Models
         private FileCopyClass fileCopyClass;
         private Config cfg;
         private MainView view;
+        private List<AlarmInfo> alarmList;
 
         public MapBuilder(Config cfg, MainView view)
         {
@@ -26,6 +27,7 @@ namespace AutoBlankMapBuilder.Models
             fileCopyClass = new FileCopyClass(commonFunc);
             this.cfg = cfg;
             this.view = view;
+            alarmList = new List<AlarmInfo>();
         }
 
         public void Process()
@@ -41,48 +43,74 @@ namespace AutoBlankMapBuilder.Models
 
             // 後処理
             //  Error Viewが表示されてなければアプリ終了
+            if (alarmList.Count > 0)
+            {
+                var alarmView = new AlarmView(alarmList);
+                alarmView.ShowDialog();
+            }
         }
 
         public void CreateMap(Order order)
         {
+            var alarmMessage = "";
+            var canCreate = true;
+
             // 機種フォルダ特定
             var srcDir = cfg.BlankMapDir + "\\" + order.Item;
             if (Directory.Exists(srcDir) == false)
             {
-                Utils.Utils.WriteLog(view, "ブランクMAP登録なし (" + order.Item + ")");
-                return;
+                canCreate = false;
+                alarmMessage += AlarmMessage.AMES_BLANK_MAP_UNKNOWN;
+                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_BLANK_MAP_UNKNOWN + " (" + order.Item + ")");
             }
 
             // INS_ALL保管先確認
             var dir = cfg.AllDataDir + "\\" + order.Item;
             if (Utils.Utils.SearchFolder(dir, order.No))
             {
-                Utils.Utils.WriteLog(view, "INS_ALLあり (" + order.Item + ")");
-                return;
+                canCreate = false;
+                if (alarmMessage != "")
+                {
+                    alarmMessage += ", ";
+                }
+                alarmMessage += AlarmMessage.AMES_INS_ALL_EXIST;
+                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_ALL_EXIST + " (" + order.Item + ")");
             }
 
             // INS_NEW保管先確認
             dir = cfg.NewDataDir + "\\" + order.Item;
             if (Utils.Utils.SearchFolder(dir, order.No))
             {
-                Utils.Utils.WriteLog(view, "INS_NEWあり (" + order.Item + ")");
-                return;
+                canCreate = false;
+                if (alarmMessage != "")
+                {
+                    alarmMessage += ", ";
+                }
+                alarmMessage += AlarmMessage.AMES_INS_NEW_EXIST;
+                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_NEW_EXIST + " (" + order.Item + ")");
             }
 
-            // MAPファイル作成
-            var dstDir = CommonConstants.TMP_PATH;
-            CreateMapFile(srcDir, dstDir, order.Item, order.No, order.Quantity, CommonConstants.EXPLORER);
+            if (canCreate)
+            {
+                // MAPファイル作成
+                var dstDir = CommonConstants.TMP_PATH;
+                CreateMapFile(srcDir, dstDir, order.Item, order.No, order.Quantity, CommonConstants.EXPLORER);
 
-            // INS_ALLにコピー
-            srcDir = dstDir;
-            dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
-            fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
+                // INS_ALLにコピー
+                srcDir = dstDir;
+                dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
+                fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
 
-            // INS_NEWにコピー
-            dstDir = cfg.NewDataDir + "\\" + order.Item + "\\" + order.No;
-            fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
+                // INS_NEWにコピー
+                dstDir = cfg.NewDataDir + "\\" + order.Item + "\\" + order.No;
+                fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
+            }
 
-            MessageBox.Show("完了");
+            if (alarmMessage != "")
+            {
+                AddAlarm(order, alarmMessage);
+            }
+
             // MAP保管履歴書込
             // MAPファイル削除
             // * ログは各工程で処理
@@ -191,5 +219,20 @@ namespace AutoBlankMapBuilder.Models
 
             }
         }
+
+        private void AddAlarm(Order order, string result)
+        {
+            this.alarmList.Add(new AlarmInfo()
+            {
+                Time = DateTime.Now,
+                Department = order.Department,
+                OrderNo = order.No,
+                Model = order.Item,
+                StartDate = order.Date,
+                Quantity = order.Quantity,
+                Result = result
+            });
+        }
+
     }
 }
