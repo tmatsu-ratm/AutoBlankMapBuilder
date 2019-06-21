@@ -63,7 +63,8 @@ namespace AutoBlankMapBuilder.Utils
             long count;
             string fileName;
 
-            msg = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff") + " " + str;
+//            msg = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff") + " " + str;
+            msg = str;
 
             try
             {

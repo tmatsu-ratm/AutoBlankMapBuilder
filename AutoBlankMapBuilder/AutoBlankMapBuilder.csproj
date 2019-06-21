@@ -107,10 +107,13 @@
     <Compile Include="CommonConstants.cs" />
     <Compile Include="Models\AlarmInfo.cs" />
     <Compile Include="Models\Config.cs" />
+    <Compile Include="Models\LogInfo.cs" />
+    <Compile Include="Models\MainTblAppendParam.cs" />
     <Compile Include="Models\MapBuilder.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Utils\CommonFunc.cs" />
     <Compile Include="Utils\FileCopyClass.cs" />
+    <Compile Include="Utils\SqlFunc.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="Views\AlarmView.xaml.cs">
       <DependentUpon>AlarmView.xaml</DependentUpon>

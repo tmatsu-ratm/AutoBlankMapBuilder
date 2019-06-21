@@ -53,7 +53,10 @@ namespace AutoBlankMapBuilder.Models
         public void CreateMap(Order order)
         {
             var alarmMessage = "";
+            var backupPath = "";
             var canCreate = true;
+            int waPass = 0;
+            int waFail = 0;
 
             // 機種フォルダ特定
             var srcDir = cfg.BlankMapDir + "\\" + order.Item;
@@ -94,11 +97,12 @@ namespace AutoBlankMapBuilder.Models
             {
                 // MAPファイル作成
                 var dstDir = CommonConstants.TMP_PATH;
-                CreateMapFile(srcDir, dstDir, order.Item, order.No, order.Quantity, CommonConstants.EXPLORER);
+                CreateMapFile(srcDir, dstDir, order.Item, order.No, order.Quantity, CommonConstants.EXPLORER, out waPass, out waFail);
 
                 // INS_ALLにコピー
                 srcDir = dstDir;
                 dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
+                backupPath = dstDir;
                 fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
 
                 // INS_NEWにコピー
@@ -111,12 +115,25 @@ namespace AutoBlankMapBuilder.Models
                 AddAlarm(order, alarmMessage);
             }
 
+            var logMes = order.Department + " " + order.No + " " + order.Item + " " + order.Date + " " +
+                         order.Quantity + " ";
+
+            if (alarmMessage == "")
+            {
+                logMes += "作成済 " + DateTime.Now.ToString("yyyy/MM/dd HH:mm " ) + waPass.ToString() + " " + waFail.ToString() + " " + backupPath;
+            }
+            else
+            {
+                logMes += alarmMessage;
+            }
+
+            commonFunc.PutLog(logMes);
+
             // MAP保管履歴書込
             // MAPファイル削除
-            // * ログは各工程で処理
         }
 
-        public void CreateMapFile(string srcDir, string dstDir, string typeName, string lotNo,int quantity, string explorerPath)
+        public void CreateMapFile(string srcDir, string dstDir, string typeName, string lotNo,int quantity, string explorerPath, out int waPass, out int waFail)
         {
             int i;
             int count = 0;
@@ -126,6 +143,8 @@ namespace AutoBlankMapBuilder.Models
             bool[] waferList = new bool[CommonConstants.WAFER_MAX];
             LotDatInformation lotDatInfo = null;
             WaferMap waferData = null;
+            waPass = 0;
+            waFail = 0;
 
             try
             {
@@ -187,6 +206,9 @@ namespace AutoBlankMapBuilder.Models
                 var passCount = waferData.wafer_test_sum_info.pass_total * count;
                 var failCount = waferData.wafer_test_sum_info.fail_total * count;
                 var testCount = waferData.wafer_test_sum_info.test_total * count;
+
+                waPass = waferData.wafer_test_sum_info.pass_total;
+                waFail = waferData.wafer_test_sum_info.fail_total;
 
                 // LOT.DATのコピー
                 srcFile = srcDir + "\\" + CommonConstants.LOT_DAT_STRING;
