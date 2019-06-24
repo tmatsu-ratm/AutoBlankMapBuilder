@@ -111,6 +111,7 @@
     <Compile Include="Models\MainTblAppendParam.cs" />
     <Compile Include="Models\MapBuilder.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\WaMainTblAppendParam.cs" />
     <Compile Include="Utils\CommonFunc.cs" />
     <Compile Include="Utils\FileCopyClass.cs" />
     <Compile Include="Utils\SqlFunc.cs" />

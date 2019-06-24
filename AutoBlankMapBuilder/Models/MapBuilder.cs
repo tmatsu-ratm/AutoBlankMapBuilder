@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,7 @@ namespace AutoBlankMapBuilder.Models
         private Config cfg;
         private MainView view;
         private List<AlarmInfo> alarmList;
+        private SqlFunc sqlFunc = new SqlFunc();
 
         public MapBuilder(Config cfg, MainView view)
         {
@@ -28,6 +30,7 @@ namespace AutoBlankMapBuilder.Models
             this.cfg = cfg;
             this.view = view;
             alarmList = new List<AlarmInfo>();
+            sqlFunc.ConnectionStringMapBackup = cfg.MapBackupDb;
         }
 
         public void Process()
@@ -121,6 +124,22 @@ namespace AutoBlankMapBuilder.Models
             if (alarmMessage == "")
             {
                 logMes += "作成済 " + DateTime.Now.ToString("yyyy/MM/dd HH:mm " ) + waPass.ToString() + " " + waFail.ToString() + " " + backupPath;
+
+                // MAP保管履歴書込
+                //  mainとwamainの"backup_date"を同値にする
+                var backupDate = DateTime.Now;
+                var dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
+                if (MainInfoAppend(backupDate, order, waPass, waFail, dstDir) != CommonConstants.ECODE_OK)
+                {
+                    logMes = logMes.Replace("作成済", "作成済（データベース書込失敗 - main）");
+                }
+                else
+                {
+                    if (WaMainInfoAppend(backupDate, order, waPass, waFail, dstDir) != CommonConstants.ECODE_OK)
+                    {
+                        logMes = logMes.Replace("作成済", "作成済（データベース書込失敗 - wamain）");
+                    }
+                }
             }
             else
             {
@@ -129,7 +148,6 @@ namespace AutoBlankMapBuilder.Models
 
             commonFunc.PutLog(logMes);
 
-            // MAP保管履歴書込
             // MAPファイル削除
         }
 
@@ -240,6 +258,90 @@ namespace AutoBlankMapBuilder.Models
             {
 
             }
+        }
+
+        private int MainInfoAppend(DateTime dt, Order order, int waPass, int waFail, string dstDir)
+        {
+            String errMsg = "";
+            string fileName = "";
+            var errCode = CommonConstants.ECODE_OK;
+            var param = new MainTblAppendParam();
+            FileInfo fInfo = null;
+
+            try
+            {
+                fileName = dstDir + "\\" + CommonConstants.LOT_DAT_STRING;
+                if (File.Exists(fileName))
+                {
+                    fInfo = new FileInfo(fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+
+            param.backup_date = dt;
+            param.backup_pc = CommonConstants.BACKUP_PC_NAME;
+            param.type_name = order.Item;
+            param.lot_name = order.No;
+            param.pass_chip_count = waPass * order.Quantity;
+            param.ng_chip_count = waFail * order.Quantity;
+            param.map_count = order.Quantity;
+            param.send_flag = true;
+            param.backup_path = dstDir;
+            param.OPE_NAME = CommonConstants.OPE_NAME;
+            param.OPE_SEQ = CommonConstants.OPE_SEQ;
+            param.LAY_NO = CommonConstants.LAY_NO;
+            param.INI_PASSCOUNT = CommonConstants.INI_PASSCOUNT;
+            param.INI_MAP_COUNT = CommonConstants.INI_MAP_COUNT;
+
+            if (fInfo != null)
+            {
+                param.file_modify = fInfo.LastWriteTime;
+            }     
+            param.backup_path2 = order.Item + "\\" + order.No;
+
+            if (sqlFunc.MainInfoAppend(param, ref errMsg) != CommonConstants.ECODE_OK)
+            {
+                errCode = CommonConstants.ECODE_ERROR;
+            }
+
+            return errCode;
+
+        }
+
+        private int WaMainInfoAppend(DateTime dt, Order order, int waPass, int waFail, string dstDir)
+        {
+            String errMsg = "";
+            var errCode = CommonConstants.ECODE_OK;
+            var param = new WaMainTblAppendParam();
+
+            try
+            {
+                for (var i = 0; i < order.Quantity; i++)
+                {
+                    param.backup_date = dt;
+                    param.backup_pc = CommonConstants.BACKUP_PC_NAME;
+                    param.type_name = order.Item;
+                    param.lot_name = order.No;
+                    param.pass_chip_count = waPass;
+                    param.ng_chip_count = waFail;
+                    param.send_flag = true;
+                    param.backup_path = dstDir;
+
+                    if (sqlFunc.WaMainInfoAppend(param, i + 1, ref errMsg) != CommonConstants.ECODE_OK)
+                    {
+                        errCode = CommonConstants.ECODE_ERROR;
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+                errCode = CommonConstants.ECODE_ERROR;
+            }
+
+            return errCode;
         }
 
         private void AddAlarm(Order order, string result)

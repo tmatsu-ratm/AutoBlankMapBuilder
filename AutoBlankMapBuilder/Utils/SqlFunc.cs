@@ -18,10 +18,99 @@ namespace AutoBlankMapBuilder.Utils
         private readonly int ECODE_OK = 0;
         private readonly int ECODE_ERROR = -1;
 
+        public int GetDateTime(ref DateTime dateTime)
+        {
+            String funcName = "GetDateTime";
+            var errCode = ECODE_ERROR;
+            String sqlCmd;
+            SqlCommand cmd;
+            SqlDataReader dr = null;
+
+            try
+            {
+                if (DbNewConnectionMapBackup())
+                {
+                    goto end;
+                }
+
+                sqlCmd = "select getdate()";
+
+                cmd = new SqlCommand(sqlCmd, mapBackupConnection);
+                dr = cmd.ExecuteReader();
+                dr.Read();
+                dateTime = DrDate(0, ref dr);
+
+                cmd.Dispose();
+
+                errCode = ECODE_OK;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            try
+            {
+                if (dr != null)
+                {
+                    dr.Close();
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            end:
+            DbConnectionCloseMapBackup();
+
+            return errCode;
+        }
+
         public String ConnectionStringMapBackup
         {
             get { return connectionStringMapBackup; }
             set { connectionStringMapBackup = value; }
+        }
+
+        public bool DbNewConnectionMapBackup()
+        {
+            var cnt = 1;
+
+            Retry:
+            try
+            {
+                mapBackupConnection = new SqlConnection(connectionStringMapBackup);
+                mapBackupConnection.Open();
+            }
+            catch (Exception ex)
+            {
+                if (cnt < 3)
+                {
+                    cnt++;
+                    goto Retry;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public void DbConnectionCloseMapBackup()
+        {
+            try
+            {
+                if (mapBackupConnection != null)
+                {
+                    mapBackupConnection.Close();
+                    mapBackupConnection.Dispose();
+                    mapBackupConnection = null;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         public int MainInfoAppend(MainTblAppendParam param, ref String msgStr)
@@ -71,12 +160,90 @@ namespace AutoBlankMapBuilder.Utils
                          "," + DateTimeToString(param.file_modify) +
                          "," + "" + param.backup_path2 + "";
 
+                if (DbNewConnectionMapBackup())
+                {
+                    msgStr = "Map Backupデータベース接続エラー";
+                    goto end;
+                }
 
+                cmd = new SqlCommand(sqlCmd, mapBackupConnection);
+                updateData = cmd.ExecuteNonQuery();
+                if (updateData <= 0)
+                {
+                    msgStr = "データベース: mainへのデータの追加に失敗しました";
+                    goto end;
+                }
+
+                errCode = ECODE_OK;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                msgStr = ex.Message;
             }
+
+            end:
+            DbConnectionCloseMapBackup();
+
+            return errCode;
+        }
+
+        public int WaMainInfoAppend(WaMainTblAppendParam param, int waferNo, ref String msgStr)
+        {
+            String funcName = "WaMainInfoAppend : ";
+            int errCode = ECODE_ERROR;
+            int updateData;
+            String sqlCmd;
+            SqlCommand cmd;
+
+            msgStr = "";
+
+            try
+            {
+                sqlCmd = "insert into wamain (backup_date" +
+                         ",backup_pc" +
+                         ",type_name" +
+                         ",lot_name" +
+                         ",pass_chip_count" +
+                         ",ng_chip_count" +
+                         ",wa" +
+                         ",send_flag" +
+                         ",backup_path" +
+                         ",JUDGE)" +
+                         " values(" + DateTimeToString(param.backup_date) +
+                         "," + "" + param.backup_pc + "" +
+                         "," + "" + param.type_name + "" +
+                         "," + "" + param.lot_name + "" +
+                         "," + param.pass_chip_count +
+                         "," + param.ng_chip_count +
+                         "," + waferNo +
+                         "," + "" + BoolToInt(param.send_flag) + "" +
+                         "," + "" + param.backup_path + "" +
+                         "," + "" + param.judge + "" + ")";
+
+                if (DbNewConnectionMapBackup())
+                {
+                    msgStr = "Map Backupデータベース接続エラー";
+                    goto end;
+                }
+
+                cmd = new SqlCommand(sqlCmd, mapBackupConnection);
+
+                updateData = cmd.ExecuteNonQuery();
+                if (updateData <= 0)
+                {
+                    msgStr = "データベース: wamainの追加に失敗しました";
+                    goto end;
+                }
+
+                errCode = ECODE_OK;
+            }
+            catch (Exception ex)
+            {
+                msgStr = ex.Message;
+            }
+
+            end:
+            DbConnectionCloseMapBackup();
 
             return errCode;
         }
@@ -96,6 +263,18 @@ namespace AutoBlankMapBuilder.Utils
             }
 
             return str;
+        }
+
+        private DateTime DrDate(int columnIndex, ref SqlDataReader dr)
+        {
+            if (dr.IsDBNull(columnIndex))
+            {
+                return DateTime.MinValue;
+            }
+            else
+            {
+                return dr.GetSqlDateTime(columnIndex).Value;
+            }
         }
 
         private String BoolToInt(bool val)
