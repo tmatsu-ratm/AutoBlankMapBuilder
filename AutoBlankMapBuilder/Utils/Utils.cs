@@ -73,18 +73,17 @@ namespace AutoBlankMapBuilder.Utils
 
         public static string GetItemString(string baseStr, string keyStr)
         {
-            string itemStr = "";
-            int topIndex = -1, endIndex = -1;
+            var itemStr = "";
 
             try
             {
-                topIndex = baseStr.IndexOf(keyStr);
+                var topIndex = baseStr.IndexOf(keyStr);
                 if (topIndex < 0)
                 {
                     return string.Empty;
                 }
 
-                endIndex = baseStr.Substring(topIndex).IndexOf(";");
+                var endIndex = baseStr.Substring(topIndex).IndexOf(";");
                 if (endIndex < 0)
                 {
                     itemStr = baseStr.Substring(topIndex);
@@ -120,7 +119,7 @@ namespace AutoBlankMapBuilder.Utils
             view.LogText.AppendText("[" + DateTime.Now.ToString()+"] " + text + "\r\n");
             view.LogText.ScrollToEnd();
             // debug
-            view.LabelText.Content = "文字数: " + n.ToString() + ", 行数: " + view.LogText.LineCount.ToString();
+//            view.LabelText.Content = "文字数: " + n.ToString() + ", 行数: " + view.LogText.LineCount.ToString();
         }
     }
 }

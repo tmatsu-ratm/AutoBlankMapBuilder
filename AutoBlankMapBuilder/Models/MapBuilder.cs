@@ -44,12 +44,16 @@ namespace AutoBlankMapBuilder.Models
                 CreateMap(order);
             }
 
-            // 後処理
-            //  Error Viewが表示されてなければアプリ終了
             if (alarmList.Count > 0)
             {
                 var alarmView = new AlarmView(alarmList);
-                alarmView.ShowDialog();
+                alarmView.Topmost = true;
+                alarmView.Show();
+            }
+
+            if (WindowManager.IsOpenWindow<AlarmView>() == false)
+            {
+                Application.Current.Shutdown();
             }
         }
 
@@ -148,7 +152,7 @@ namespace AutoBlankMapBuilder.Models
 
             commonFunc.PutLog(logMes);
 
-            // MAPファイル削除
+            fileCopyClass.DeleteDirectory(CommonConstants.TMP_PATH);
         }
 
         public void CreateMapFile(string srcDir, string dstDir, string typeName, string lotNo,int quantity, string explorerPath, out int waPass, out int waFail)

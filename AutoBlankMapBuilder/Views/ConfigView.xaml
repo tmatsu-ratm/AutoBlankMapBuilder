@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:form="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:local="clr-namespace:AutoBlankMapBuilder.Views"
         mc:Ignorable="d"
         Title="コンフィグレーション" Height="450" Width="800">
-    <Grid>
+    <Grid Background="LightGray">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="9*"/>
@@ -23,7 +24,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid Row="0" Column="0" Margin="2">
-                <Label Content="投入リスト" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" />
+                <Label Content="投入リスト" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White" />
             </Grid>
             <Grid Row="0" Column="1" Background="Yellow" Margin="2">
                 <TextBlock x:Name="TBlockOrderList" VerticalAlignment="Center" Margin="10,0,0,0" />
@@ -32,7 +33,7 @@
                 <Button x:Name="Button1" Content="参照" Click="Button1_OnClick" Margin="2"></Button>
             </Grid>
             <Grid Row="1" Column="0" Margin="2">
-                <Label Content="ブランクMAPフォルダ" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" />
+                <Label Content="ブランクMAPフォルダ" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White" />
             </Grid>
             <Grid Row="1" Column="1" Background="Yellow" Margin="2">
                 <TextBlock x:Name="TBlockMapFolder" VerticalAlignment="Center" Margin="10,0,0,0" />
@@ -49,7 +50,7 @@
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
             <Grid Row="0" Background="DarkGray" Margin="2">
-                <Label Content="データサーバ" HorizontalAlignment="Center"/>
+                <Label Content="データサーバ" HorizontalAlignment="Center" />
             </Grid>
             <Grid Row="1">
                 <Grid.RowDefinitions>
@@ -62,7 +63,7 @@
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 <Grid Row="0" Column="0" Margin="2">
-                    <Label Content="個々のデータ保管フォルダ" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" />
+                    <Label Content="個々のデータ保管フォルダ" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White" />
                 </Grid>
                 <Grid Row="0" Column="1" Background="Yellow" Margin="2">
                     <TextBlock x:Name="TBlockAllFolder" VerticalAlignment="Center" Margin="10,0,0,0"/>
@@ -71,7 +72,7 @@
                     <Button x:Name="Button3" Content="参照" Click="Button3_OnClick" Margin="2"></Button>
                 </Grid>
                 <Grid Row="1" Column="0" Margin="2">
-                    <Label Content="直近のデータ保管フォルダ" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="直近のデータ保管フォルダ" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
                 <Grid Row="1" Column="1" Background="Yellow" Margin="2">
                     <TextBlock x:Name="TBlockNewFolder" VerticalAlignment="Center" Margin="10,0,0,0"/>
@@ -93,28 +94,28 @@
                     <ColumnDefinition Width="5*"/>
                 </Grid.ColumnDefinitions>
                 <Grid Row="0" RowSpan="4" Column="0" Margin="2" >
-                    <Label Content="MAP保管履歴" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="MAP保管履歴&#xa;(Config.xmlで変更)" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
                 <Grid Row="0" Column="1" Margin="2">
-                    <Label Content="User Id" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="User Id" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
                 <Grid Row="1" Column="1" Background="Yellow" Margin="2">
                     <TextBlock x:Name="TBlockDbUsr" VerticalAlignment="Center" Margin="10,0,0,0"/>
                 </Grid>
                 <Grid Row="0" Column="2" Margin="2">
-                    <Label Content="Password" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="Password" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
                 <Grid Row="1" Column="2" Background="Yellow" Margin="2">
                     <TextBlock x:Name="TBlockDbPw" VerticalAlignment="Center" Margin="10,0,0,0"/>
                 </Grid>
                 <Grid Row="2" Column="1" Margin="2">
-                    <Label Content="Server名" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="Server名" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
                 <Grid Row="3" Column="1" Background="Yellow" Margin="2">
                     <TextBlock x:Name="TBlockDbSrv" VerticalAlignment="Center" Margin="10,0,0,0"/>
                 </Grid>
                 <Grid Row="2" Column="2" Margin="2">
-                    <Label Content="データベース名" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="データベース名" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
                 <Grid Row="3" Column="2" Background="Yellow" Margin="2">
                     <TextBlock x:Name="TBlockDbName" VerticalAlignment="Center" Margin="10,0,0,0"/>
@@ -131,16 +132,18 @@
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 <Grid Row="0" Column="0" Margin="2">
-                    <Label Content="OLEDBプロバイダ" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="OLEDBプロバイダ" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
                 <Grid Row="0" Column="1" Background="Yellow" Margin="2">
                     <TextBlock x:Name="TBlockDbProvider" VerticalAlignment="Center" Margin="10,0,0,0" />
                 </Grid>
                 <Grid Row="1" Column="0" Margin="2">
-                    <Label Content="投入MAP自動作成時刻" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1"/>
+                    <Label Content="投入MAP自動作成時刻" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White"/>
                 </Grid>
-                <Grid Row="1" Column="1" Background="Yellow" Margin="2">
-                    <TextBlock x:Name="TBlockExeTime" VerticalAlignment="Center" Margin="10,0,0,0" />
+                <Grid Row="1" Column="1">
+                    <WindowsFormsHost>
+                        <form:DateTimePicker x:Name="TimePicker" Format="Custom" CustomFormat="HH:mm" ShowUpDown="True" />
+                    </WindowsFormsHost>
                 </Grid>
             </Grid>
         </Grid>

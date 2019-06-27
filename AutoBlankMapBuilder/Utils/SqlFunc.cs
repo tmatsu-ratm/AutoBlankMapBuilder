@@ -18,54 +18,6 @@ namespace AutoBlankMapBuilder.Utils
         private readonly int ECODE_OK = 0;
         private readonly int ECODE_ERROR = -1;
 
-        public int GetDateTime(ref DateTime dateTime)
-        {
-            String funcName = "GetDateTime";
-            var errCode = ECODE_ERROR;
-            String sqlCmd;
-            SqlCommand cmd;
-            SqlDataReader dr = null;
-
-            try
-            {
-                if (DbNewConnectionMapBackup())
-                {
-                    goto end;
-                }
-
-                sqlCmd = "select getdate()";
-
-                cmd = new SqlCommand(sqlCmd, mapBackupConnection);
-                dr = cmd.ExecuteReader();
-                dr.Read();
-                dateTime = DrDate(0, ref dr);
-
-                cmd.Dispose();
-
-                errCode = ECODE_OK;
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            try
-            {
-                if (dr != null)
-                {
-                    dr.Close();
-                }
-            }
-            catch (Exception)
-            {
-
-            }
-            end:
-            DbConnectionCloseMapBackup();
-
-            return errCode;
-        }
-
         public String ConnectionStringMapBackup
         {
             get { return connectionStringMapBackup; }
@@ -143,22 +95,22 @@ namespace AutoBlankMapBuilder.Utils
                          ",file_modify" +
                          ",backup_path2) " +
                          " select " + DateTimeToString(param.backup_date) +
-                         "," + "" + param.backup_pc + "" +
-                         "," + "" + param.type_name + "" +
-                         "," + "" + param.lot_name + "" +
+                         "," + "'" + param.backup_pc + "'" +
+                         "," + "'" + param.type_name + "'" +
+                         "," + "'" + param.lot_name + "'" +
                          "," + param.pass_chip_count +
                          "," + param.ng_chip_count +
                          "," + param.map_count +
-                         "," + "" + BoolToInt(param.send_flag) + "" +
-                         "," + "" + param.backup_path + "" +
-                         "," + "" + param.OPE_NAME + "" +
+                         "," + "'" + BoolToInt(param.send_flag) + "'" +
+                         "," + "'" + param.backup_path + "'" +
+                         "," + "'" + param.OPE_NAME + "'" +
                          "," + param.OPE_SEQ +
-                         "," + "" + param.LAY_NO + "" +
+                         "," + "'" + param.LAY_NO + "'" +
                          "," + param.INI_PASSCOUNT +
                          "," + param.INI_MAP_COUNT +
                          "," + DateTimeToString(param.INI_MAP_DATE) +
                          "," + DateTimeToString(param.file_modify) +
-                         "," + "" + param.backup_path2 + "";
+                         "," + "'" + param.backup_path2 + "'";
 
                 if (DbNewConnectionMapBackup())
                 {
@@ -210,15 +162,15 @@ namespace AutoBlankMapBuilder.Utils
                          ",backup_path" +
                          ",JUDGE)" +
                          " values(" + DateTimeToString(param.backup_date) +
-                         "," + "" + param.backup_pc + "" +
-                         "," + "" + param.type_name + "" +
-                         "," + "" + param.lot_name + "" +
+                         "," + "'" + param.backup_pc + "'" +
+                         "," + "'" + param.type_name + "'" +
+                         "," + "'" + param.lot_name + "'" +
                          "," + param.pass_chip_count +
                          "," + param.ng_chip_count +
                          "," + waferNo +
-                         "," + "" + BoolToInt(param.send_flag) + "" +
-                         "," + "" + param.backup_path + "" +
-                         "," + "" + param.judge + "" + ")";
+                         "," + "'" + BoolToInt(param.send_flag) + "'" +
+                         "," + "'" + param.backup_path + "'" +
+                         "," + "'" + param.judge + "'" + ")";
 
                 if (DbNewConnectionMapBackup())
                 {
@@ -255,7 +207,7 @@ namespace AutoBlankMapBuilder.Utils
             {
                 if (dt != new DateTime(0))
                 {
-                    str = "" + dt.ToString("yyyy/MM/dd HH:mm:ss") + "";
+                    str = "'" + dt.ToString("yyyy/MM/dd HH:mm:ss") + "'";
                 }
             }
             catch (Exception)

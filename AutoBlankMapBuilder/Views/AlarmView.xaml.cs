@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using Microsoft.Windows.Controls;
 using Microsoft.Windows.Controls.Primitives;
 using AutoBlankMapBuilder.Models;
+using AutoBlankMapBuilder.Utils;
 
 namespace AutoBlankMapBuilder.Views
 {
@@ -46,7 +47,9 @@ namespace AutoBlankMapBuilder.Views
 
             dataGrid.ColumnHeaderStyle = style;
 
-            dataGrid.Columns.Add(new DataGridTextColumn() {Header = "処理時間", Binding = new Binding("Time")});
+            var testBind = new Binding("Time");
+            testBind.StringFormat = "yyyy/MM/dd HH:mm:ss";
+            dataGrid.Columns.Add(new DataGridTextColumn() {Header = "処理時間", Binding = testBind});
             dataGrid.Columns.Add(new DataGridTextColumn() {Header = "部署コード", Binding = new Binding("Department")});
             dataGrid.Columns.Add(new DataGridTextColumn() {Header = "オーダNO", Binding = new Binding("OrderNo")});
             dataGrid.Columns.Add(new DataGridTextColumn() {Header = "KISYU", Binding = new Binding("Model")});
@@ -62,11 +65,12 @@ namespace AutoBlankMapBuilder.Views
 
             dataGrid.CanUserDeleteRows = true;
 
-            dataGrid.Height = 300;
+            dataGrid.Height = 350;
 
             dataGrid.DataContext = Alarms;
             dataGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding());
         }
+
     }
 }
 

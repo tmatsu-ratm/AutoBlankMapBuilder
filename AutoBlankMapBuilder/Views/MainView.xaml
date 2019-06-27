@@ -8,10 +8,21 @@
         Title="AutoBlankMapBuilder" Height="450" Width="800">
     <Grid>
         <StackPanel>
-            <Button x:Name="Button1" Content="設定" Click="Button1_OnClick"></Button>
-            <Button x:Name="Button2" Content="作成" Click="Button2_OnClick"></Button>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid Column="0">
+                    <Button x:Name="Button1" Content="設定" Click="Button1_OnClick" Margin="20 5"/>
+                </Grid>
+                <Grid Column="1">
+                    <Button x:Name="Button2" Content="作成" Click="Button2_OnClick" Margin="20 5"/>
+                </Grid>
+            </Grid>
             <TextBox x:Name="LogText" AcceptsReturn="True" Height="300" Margin="5" VerticalScrollBarVisibility="Auto" BorderBrush="DimGray" BorderThickness="1" />
-            <Label x:Name="LabelText" Content="Label"/>
+            <Label x:Name="LabelTimer" />
+            <Label x:Name="LabelTimer2"/>
         </StackPanel>
         
     </Grid>

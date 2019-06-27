@@ -36,10 +36,11 @@ namespace AutoBlankMapBuilder.Views
             TBlockMapFolder.Text = cfg.BlankMapDir;
             TBlockOrderList.Text = cfg.OrderList;
             TBlockDbUsr.Text = cfg.DbUser;
-            TBlockDbPw.Text = cfg.DbPwd;
+            TBlockDbPw.Text = new string('*', cfg.DbPwd.Length);
             TBlockDbSrv.Text = cfg.DbServer;
             TBlockDbName.Text = cfg.DbName;
             TBlockDbProvider.Text = "Microsoft.ACE.OLEDB.12.0";
+            TimePicker.Value = DateTime.ParseExact( cfg.ExecuteTime, "HH:mm", null);
         }
 
         private void Button1_OnClick(object sender, RoutedEventArgs e)
@@ -56,29 +57,32 @@ namespace AutoBlankMapBuilder.Views
 
         private void Button2_OnClick(object sender, RoutedEventArgs e)
         {
-            if (GetFolderName().Length > 0)
+            var folderName = GetFolderName();
+            if (folderName.Length > 0)
             {
-                TBlockMapFolder.Text = GetFolderName();
+                TBlockMapFolder.Text = folderName;
             }
         }
 
         private void Button3_OnClick(object sender, RoutedEventArgs e)
         {
-            if (GetFolderName().Length > 0)
+            var folderName = GetFolderName();
+            if (folderName.Length > 0)
             {
-                TBlockAllFolder.Text = GetFolderName();
+                TBlockAllFolder.Text = folderName;
             }
         }
 
         private void Button4_OnClick(object sender, RoutedEventArgs e)
         {
-            if (GetFolderName().Length > 0)
+            var folderName = GetFolderName();
+            if (folderName.Length > 0)
             {
-                TBlockNewFolder.Text = GetFolderName();
+                TBlockNewFolder.Text = folderName;
             }
         }
 
-        private string GetFolderName()
+        private static string GetFolderName()
         {
             var folderName = "";
 
@@ -104,5 +108,6 @@ namespace AutoBlankMapBuilder.Views
             cfg.SaveConfigFile(this, cfg.filePath);
             this.Close();
         }
+
     }
 }

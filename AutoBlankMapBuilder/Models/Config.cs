@@ -10,7 +10,7 @@ namespace AutoBlankMapBuilder.Models
 
     public class Config
     {
-        public static readonly string CONFIG_FILE_PATH = @"..\Config\Config.xml";
+        public static readonly string CONFIG_FILE_PATH = @".\Config\Config.xml";
 
         // Server
         public string AllDataDir { get; set; }
@@ -23,6 +23,9 @@ namespace AutoBlankMapBuilder.Models
         public string DbPwd { get; set; }
         public string DbServer { get; set; }
         public string DbName { get; set; }
+
+        // 実行時刻
+        public string ExecuteTime { get; set; }
 
         public string OrderList { get; set; }
 
@@ -68,10 +71,13 @@ namespace AutoBlankMapBuilder.Models
                 OrderList = file.Element("OrderList").Value;
                 var db = doc.Element("Config").Element("DB").Element("MAP_BACKUP");
                 var conString = db.Element("ConnectionStrings").Value;
+                MapBackupDb = conString;
                 DbUser = Utils.Utils.GetItemString(conString, "User ID");
                 DbPwd = Utils.Utils.GetItemString(conString, "Password");
                 DbServer = Utils.Utils.GetItemString(conString, "Server");
                 DbName = Utils.Utils.GetItemString(conString, "Database");
+                var application = doc.Element("Config").Element("Application");
+                ExecuteTime = application.Element("ExecuteTime").Value;
             }
             catch (Exception ex)
             {
@@ -111,6 +117,8 @@ namespace AutoBlankMapBuilder.Models
                 server.Element("BlankMap").Value = view.TBlockMapFolder.Text;
                 var file = doc.Element("Config").Element("File");
                 file.Element("OrderList").Value = view.TBlockOrderList.Text;
+                var application = doc.Element("Config").Element("Application");
+                application.Element("ExecuteTime").Value = view.TimePicker.Value.ToString("HH:mm");
 
                 doc.Save(fileName);
                 LoadConfigFile(fileName);
@@ -145,7 +153,11 @@ namespace AutoBlankMapBuilder.Models
                             new XElement("ConnectionStrings",
                                 new XAttribute("Comment", "接続文字列"),
                                 new XText("Persist Security Info=False;User ID='sa';Password='Rohm789';Server=EES-SERVER\\SQL2008R2;Database=MAP_BACKUP"))
-                            ))
+                            )),
+                    new XElement("Application",
+                        new XElement("ExecuteTime",
+                            new XAttribute("Comment", "MAP自動作成実行時刻"),
+                            new XText("22:00")))
                     ));
 
             doc.Save(filename);

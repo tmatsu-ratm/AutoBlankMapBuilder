@@ -20,9 +20,9 @@ namespace AutoBlankMapBuilder
 
         public static readonly string EXPLORER = "EXPLORER.EXE";
 
-        public static readonly string TMP_PATH = "../TMP";
+        public static readonly string TMP_PATH = "./TMP";
 
-        public static readonly string LOG_PATH = "../LOG";
+        public static readonly string LOG_PATH = "./LOG";
         public static readonly string FILE_TYPE = ".log";
         public static readonly uint FILE_MAX = 100;
         public static readonly uint FILE_SIZE = 5000000;
