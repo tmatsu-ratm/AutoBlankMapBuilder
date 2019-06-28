@@ -16,6 +16,7 @@ namespace AutoBlankMapBuilder.Models
         public string AllDataDir { get; set; }
         public string NewDataDir { get; set; }
         public string BlankMapDir { get; set; }
+        public string LogDir { get; set; }
 
         // DB
         public string MapBackupDb { get; set; }
@@ -67,6 +68,7 @@ namespace AutoBlankMapBuilder.Models
                 AllDataDir = server.Element("AllDataDirectory").Value;
                 NewDataDir = server.Element("NewDataDirectory").Value;
                 BlankMapDir = server.Element("BlankMap").Value;
+                LogDir = server.Element("Log").Value;
                 var file = doc.Element("Config").Element("File");
                 OrderList = file.Element("OrderList").Value;
                 var db = doc.Element("Config").Element("DB").Element("MAP_BACKUP");
@@ -108,6 +110,11 @@ namespace AutoBlankMapBuilder.Models
                 return;
             }
 
+            if (view.TBlockLogFolder.Text.Length <= 0)
+            {
+                return;
+            }
+
             try
             {
                 var doc = XDocument.Load(fileName);
@@ -115,6 +122,7 @@ namespace AutoBlankMapBuilder.Models
                 server.Element("AllDataDirectory").Value = view.TBlockAllFolder.Text; 
                 server.Element("NewDataDirectory").Value = view.TBlockNewFolder.Text;
                 server.Element("BlankMap").Value = view.TBlockMapFolder.Text;
+                server.Element("Log").Value = view.TBlockLogFolder.Text;
                 var file = doc.Element("Config").Element("File");
                 file.Element("OrderList").Value = view.TBlockOrderList.Text;
                 var application = doc.Element("Config").Element("Application");
@@ -142,7 +150,10 @@ namespace AutoBlankMapBuilder.Models
                             new XText("C:\\TMP\\INS_NEW")),
                         new XElement("BlankMap",
                             new XAttribute("Comment", "マップファイルを新規作成する際に元になるファイルが保管されているフォルダ"),
-                            new XText("C:\\TMP\\BLANK_MAP"))
+                            new XText("C:\\TMP\\BLANK_MAP")),
+                        new XElement("Log",
+                            new XAttribute("Comment", "マップ作成ログ保管フォルダ"),
+                            new XText("C:\\TMP\\LOG"))
                         ),
                     new XElement("File",
                         new XElement("OrderList",

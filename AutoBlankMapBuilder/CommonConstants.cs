@@ -24,7 +24,7 @@ namespace AutoBlankMapBuilder
 
         public static readonly string LOG_PATH = "./LOG";
         public static readonly string FILE_TYPE = ".log";
-        public static readonly uint FILE_MAX = 100;
+        public static readonly uint FILE_MAX = 10;
         public static readonly uint FILE_SIZE = 5000000;
     }
 
@@ -34,5 +34,8 @@ namespace AutoBlankMapBuilder
         public static readonly string AMES_INS_ALL_EXIST = "INS_ALLあり";
         public static readonly string AMES_INS_NEW_EXIST = "INS_NEWあり";
         public static readonly string AMES_NETWORK_ERROR = "ネットワークエラー";
+        public static readonly string AMES_MAP_CREATE_ERROR = "MAP作成失敗";        
+        public static readonly string AMES_INS_ALL_COPY_ERROR = "INS_ALLコピー失敗";
+        public static readonly string AMES_INS_NEW_COPY_ERROR = "INS_NEWコピー失敗";
     }
 }

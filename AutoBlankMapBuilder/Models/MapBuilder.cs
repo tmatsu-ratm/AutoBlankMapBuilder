@@ -24,7 +24,7 @@ namespace AutoBlankMapBuilder.Models
 
         public MapBuilder(Config cfg, MainView view)
         {
-            commonFunc = new CommonFunc("AutoBlankMapBuilder");
+            commonFunc = new CommonFunc("AutoBlankMapBuilder", cfg);
             fileAccessClass = new FileAccessClass();
             fileCopyClass = new FileCopyClass(commonFunc);
             this.cfg = cfg;
@@ -37,6 +37,20 @@ namespace AutoBlankMapBuilder.Models
         {
             // List作成
             var list = Utils.Utils.GetOrderList(cfg.OrderList);
+
+            if (list == null)
+            {
+                alarmList.Add(new AlarmInfo()
+                {
+                    Time = DateTime.Now,
+                    Result = "リストの作成に失敗しました"
+                });
+
+                var alarmView = new AlarmView(alarmList);
+                alarmView.Topmost = true;
+                alarmView.Show();
+                return;
+            }
 
             // ブランクマップ作成処理
             foreach (var order in list)
@@ -104,17 +118,35 @@ namespace AutoBlankMapBuilder.Models
             {
                 // MAPファイル作成
                 var dstDir = CommonConstants.TMP_PATH;
-                CreateMapFile(srcDir, dstDir, order.Item, order.No, order.Quantity, CommonConstants.EXPLORER, out waPass, out waFail);
+                var rc = CreateMapFile(srcDir, dstDir, order.Item, order.No, order.Quantity, CommonConstants.EXPLORER, out waPass, out waFail);
 
-                // INS_ALLにコピー
-                srcDir = dstDir;
-                dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
-                backupPath = dstDir;
-                fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
+                if (rc == CommonConstants.ECODE_OK)
+                {
+                    // INS_ALLにコピー
+                    srcDir = dstDir;
+                    dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
+                    backupPath = dstDir;
+                    rc = fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
+                    if (rc != CommonConstants.ECODE_OK)
+                    {
+                        alarmMessage += AlarmMessage.AMES_INS_ALL_COPY_ERROR;
+                        Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_ALL_COPY_ERROR + " (" + order.Item + ")");
+                    }
+                    // INS_NEWにコピー
+                    dstDir = cfg.NewDataDir + "\\" + order.Item + "\\" + order.No;
+                    rc = fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
+                    if (rc != CommonConstants.ECODE_OK)
+                    {
+                        alarmMessage += AlarmMessage.AMES_INS_NEW_COPY_ERROR;
+                        Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_NEW_COPY_ERROR + " (" + order.Item + ")");
+                    }
+                }
+                else
+                {
+                    alarmMessage += AlarmMessage.AMES_MAP_CREATE_ERROR;
+                    Utils.Utils.WriteLog(view,  AlarmMessage.AMES_MAP_CREATE_ERROR + " (" + order.Item + ")");
+                }
 
-                // INS_NEWにコピー
-                dstDir = cfg.NewDataDir + "\\" + order.Item + "\\" + order.No;
-                fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
             }
 
             if (alarmMessage != "")
@@ -155,7 +187,7 @@ namespace AutoBlankMapBuilder.Models
             fileCopyClass.DeleteDirectory(CommonConstants.TMP_PATH);
         }
 
-        public void CreateMapFile(string srcDir, string dstDir, string typeName, string lotNo,int quantity, string explorerPath, out int waPass, out int waFail)
+        public int CreateMapFile(string srcDir, string dstDir, string typeName, string lotNo,int quantity, string explorerPath, out int waPass, out int waFail)
         {
             int i;
             int count = 0;
@@ -176,7 +208,7 @@ namespace AutoBlankMapBuilder.Models
                 if (rc != CommonConstants.ECODE_OK)
                 {
                     Utils.Utils.WriteLog(view, "LOT.DAT読込失敗 (" + typeName + ")");
-                    return;
+                    return rc;
                 }
 
                 // コピー先のファイルを削除
@@ -195,7 +227,7 @@ namespace AutoBlankMapBuilder.Models
                 if (i >= CommonConstants.WAFER_MAX)
                 {
                     Utils.Utils.WriteLog(view, "WA-xx.datが存在しません (" + typeName + ")");
-                    return;
+                    return CommonConstants.ECODE_ERROR;
                 }
 
                 // 未使用??
@@ -204,8 +236,8 @@ namespace AutoBlankMapBuilder.Models
                 rc = fileAccessClass.WaferDataReadToClass(srcFile, ref lotDatInfo, ref waferData, false, ref errMsg);
                 if (rc != CommonConstants.ECODE_OK)
                 {
-                    // TODO
-                    return;
+                    Utils.Utils.WriteLog(view, "Error : WaferDataReadToClass");
+                    return rc;
                 }
 
                 if (Directory.Exists(dstDir) == false)
@@ -254,14 +286,16 @@ namespace AutoBlankMapBuilder.Models
                     testCount, ref errMsg);
                 if (rc != CommonConstants.ECODE_OK)
                 {
-                    // TODO:
-                    return;
+                    Utils.Utils.WriteLog(view, "Error : LotData_UpdateSomeInfo");
+                    return rc;
                 }
             }
             catch (Exception ex)
             {
-
+                return CommonConstants.ECODE_ERROR;
             }
+
+            return CommonConstants.ECODE_OK;
         }
 
         private int MainInfoAppend(DateTime dt, Order order, int waPass, int waFail, string dstDir)

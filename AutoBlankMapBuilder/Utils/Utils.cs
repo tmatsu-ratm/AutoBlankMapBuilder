@@ -39,35 +39,43 @@ namespace AutoBlankMapBuilder.Utils
 
         public static List<Order> GetOrderList(string fileName)
         {
-            using (var package = new ExcelPackage())
+            try
             {
-                using (var stream = File.OpenRead(fileName))
+                using (var package = new ExcelPackage())
                 {
-                    package.Load(stream);
-                }
 
-                var list = new List<Order>();
-                var sheet = package.Workbook.Worksheets[1];
-
-                var i = 2;
-
-                while (true)
-                {
-                    if (sheet.Cells[i, 1].Text == "")
+                    using (var stream = File.OpenRead(fileName))
                     {
-                        break;
+                        package.Load(stream);
                     }
-                    var order = new Order();
-                    order.Department = sheet.Cells[i, 1].Text;
-                    order.No = sheet.Cells[i, 2].Text;
-                    order.Item = sheet.Cells[i, 3].Text;
-                    order.Date = sheet.Cells[i, 4].Text;
-                    order.Quantity = int.Parse(sheet.Cells[i, 5].Text);
-                    list.Add(order);
-                    i++;
-                }
 
-                return list;
+                    var list = new List<Order>();
+                    var sheet = package.Workbook.Worksheets[1];
+
+                    var i = 2;
+
+                    while (true)
+                    {
+                        if (sheet.Cells[i, 1].Text == "")
+                        {
+                            break;
+                        }
+                        var order = new Order();
+                        order.Department = sheet.Cells[i, 1].Text;
+                        order.No = sheet.Cells[i, 2].Text;
+                        order.Item = sheet.Cells[i, 3].Text;
+                        order.Date = sheet.Cells[i, 4].Text;
+                        order.Quantity = int.Parse(sheet.Cells[i, 5].Text);
+                        list.Add(order);
+                        i++;
+                    }
+
+                    return list;
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -118,8 +126,6 @@ namespace AutoBlankMapBuilder.Utils
           
             view.LogText.AppendText("[" + DateTime.Now.ToString()+"] " + text + "\r\n");
             view.LogText.ScrollToEnd();
-            // debug
-//            view.LabelText.Content = "文字数: " + n.ToString() + ", 行数: " + view.LogText.LineCount.ToString();
         }
     }
 }

@@ -35,6 +35,7 @@ namespace AutoBlankMapBuilder.Views
             TBlockNewFolder.Text = cfg.NewDataDir;
             TBlockMapFolder.Text = cfg.BlankMapDir;
             TBlockOrderList.Text = cfg.OrderList;
+            TBlockLogFolder.Text = cfg.LogDir;
             TBlockDbUsr.Text = cfg.DbUser;
             TBlockDbPw.Text = new string('*', cfg.DbPwd.Length);
             TBlockDbSrv.Text = cfg.DbServer;
@@ -107,6 +108,15 @@ namespace AutoBlankMapBuilder.Views
         {
             cfg.SaveConfigFile(this, cfg.filePath);
             this.Close();
+        }
+
+        private void Button7_OnClick(object sender, RoutedEventArgs e)
+        {
+            var folderName = GetFolderName();
+            if (folderName.Length > 0)
+            {
+                TBlockLogFolder.Text = folderName;
+            }
         }
 
     }

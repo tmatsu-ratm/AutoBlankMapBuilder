@@ -77,7 +77,7 @@ namespace AutoBlankMapBuilder.Utils
             }
             catch (Exception ex)
             {
-
+                errCode = CommonConstants.ECODE_ERROR;
             }
 
             return errCode;

@@ -14,9 +14,11 @@ namespace AutoBlankMapBuilder.Utils
         private string logDir = "";
         private uint fileCount = 0;
 
-        public CommonFunc(string logFileName)
+        public CommonFunc(string logFileName, Config cfg)
         {
-            logDir = Environment.CurrentDirectory + "\\" + CommonConstants.LOG_PATH;
+            this.cfg = cfg;
+//            logDir = Environment.CurrentDirectory + "\\" + CommonConstants.LOG_PATH;
+            logDir = this.cfg.LogDir;
             this.logFileName = logFileName;
 
             if (Directory.Exists(logDir) == false)
@@ -63,7 +65,6 @@ namespace AutoBlankMapBuilder.Utils
             long count;
             string fileName;
 
-//            msg = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff") + " " + str;
             msg = str;
 
             try

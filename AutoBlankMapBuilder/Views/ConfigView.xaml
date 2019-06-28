@@ -9,12 +9,13 @@
         Title="コンフィグレーション" Height="450" Width="800">
     <Grid Background="LightGray">
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="3*"/>
             <RowDefinition Height="9*"/>
             <RowDefinition Height="1.2*"/>
         </Grid.RowDefinitions>
         <Grid Row="0">
             <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
@@ -40,6 +41,15 @@
             </Grid>
             <Grid Row="1" Column="2">
                 <Button x:Name="Button2" Content="参照" Click="Button2_OnClick" Margin="2"></Button>
+            </Grid>
+            <Grid Row="2" Column="0" Margin="2">
+                <Label Content="LOGフォルダ" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White" />
+            </Grid>
+            <Grid Row="2" Column="1" Background="Yellow" Margin="2">
+                <TextBlock x:Name="TBlockLogFolder" VerticalAlignment="Center" Margin="10,0,0,0" />
+            </Grid>
+            <Grid Row="2" Column="2">
+                <Button x:Name="Button7" Content="参照" Click="Button7_OnClick" Margin="2"></Button>
             </Grid>
         </Grid>
         <Grid Row="1">
