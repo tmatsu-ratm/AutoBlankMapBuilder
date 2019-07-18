@@ -37,5 +37,8 @@ namespace AutoBlankMapBuilder
         public static readonly string AMES_MAP_CREATE_ERROR = "MAP作成失敗";        
         public static readonly string AMES_INS_ALL_COPY_ERROR = "INS_ALLコピー失敗";
         public static readonly string AMES_INS_NEW_COPY_ERROR = "INS_NEWコピー失敗";
+        public static readonly string AMES_DB_ERROR = "DBエラー";
+        public static readonly string AMES_INS_ALL_SEARCH_ERROR = "INS_ALLディレクトリサーチ失敗";
+        public static readonly string AMES_INS_NEW_SEARCH_ERROR = "INS_NEWディレクトリサーチ失敗";
     }
 }

@@ -64,11 +64,12 @@ namespace AutoBlankMapBuilder.Models
                 alarmView.Topmost = true;
                 alarmView.Show();
             }
-
+            /*
             if (WindowManager.IsOpenWindow<AlarmView>() == false)
             {
                 Application.Current.Shutdown();
             }
+            */
         }
 
         public void CreateMap(Order order)
@@ -85,12 +86,13 @@ namespace AutoBlankMapBuilder.Models
             {
                 canCreate = false;
                 alarmMessage += AlarmMessage.AMES_BLANK_MAP_UNKNOWN;
-                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_BLANK_MAP_UNKNOWN + " (" + order.Item + ")");
+                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_BLANK_MAP_UNKNOWN + " (" + order.No + ")");
             }
 
             // INS_ALL保管先確認
             var dir = cfg.AllDataDir + "\\" + order.Item;
-            if (Utils.Utils.SearchFolder(dir, order.No))
+            var searchResult = Utils.Utils.SearchFolder(dir, order.No);
+            if (searchResult == 1)
             {
                 canCreate = false;
                 if (alarmMessage != "")
@@ -98,12 +100,24 @@ namespace AutoBlankMapBuilder.Models
                     alarmMessage += ", ";
                 }
                 alarmMessage += AlarmMessage.AMES_INS_ALL_EXIST;
-                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_ALL_EXIST + " (" + order.Item + ")");
+                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_ALL_EXIST + " (" + order.No + ")");
+            }
+            else if (searchResult == -1)
+            {
+                canCreate = false;
+                if (alarmMessage != "")
+                {
+                    alarmMessage += ", ";
+                }
+
+                alarmMessage += AlarmMessage.AMES_INS_ALL_SEARCH_ERROR;
+                Utils.Utils.WriteLog(view, AlarmMessage.AMES_INS_ALL_SEARCH_ERROR + " (" + order.No + ")");
             }
 
             // INS_NEW保管先確認
             dir = cfg.NewDataDir + "\\" + order.Item;
-            if (Utils.Utils.SearchFolder(dir, order.No))
+            searchResult = Utils.Utils.SearchFolder(dir, order.No);
+            if (searchResult == 1)
             {
                 canCreate = false;
                 if (alarmMessage != "")
@@ -111,7 +125,18 @@ namespace AutoBlankMapBuilder.Models
                     alarmMessage += ", ";
                 }
                 alarmMessage += AlarmMessage.AMES_INS_NEW_EXIST;
-                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_NEW_EXIST + " (" + order.Item + ")");
+                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_NEW_EXIST + " (" + order.No + ")");
+            }
+            else if (searchResult == -1)
+            {
+                canCreate = false;
+                if (alarmMessage != "")
+                {
+                    alarmMessage += ", ";
+                }
+
+                alarmMessage += AlarmMessage.AMES_INS_NEW_SEARCH_ERROR;
+                Utils.Utils.WriteLog(view, AlarmMessage.AMES_INS_NEW_SEARCH_ERROR + " (" + order.No + ")");
             }
 
             if (canCreate)
@@ -130,13 +155,17 @@ namespace AutoBlankMapBuilder.Models
                     if (rc != CommonConstants.ECODE_OK)
                     {
                         alarmMessage += AlarmMessage.AMES_INS_ALL_COPY_ERROR;
-                        Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_ALL_COPY_ERROR + " (" + order.Item + ")");
+                        Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_ALL_COPY_ERROR + " (" + order.No + ")");
                     }
                     // INS_NEWにコピー
                     dstDir = cfg.NewDataDir + "\\" + order.Item + "\\" + order.No;
                     rc = fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
                     if (rc != CommonConstants.ECODE_OK)
                     {
+                        if (alarmMessage != "")
+                        {
+                            alarmMessage += ", ";
+                        }
                         alarmMessage += AlarmMessage.AMES_INS_NEW_COPY_ERROR;
                         Utils.Utils.WriteLog(view,  AlarmMessage.AMES_INS_NEW_COPY_ERROR + " (" + order.Item + ")");
                     }
@@ -144,16 +173,10 @@ namespace AutoBlankMapBuilder.Models
                 else
                 {
                     alarmMessage += AlarmMessage.AMES_MAP_CREATE_ERROR;
-                    Utils.Utils.WriteLog(view,  AlarmMessage.AMES_MAP_CREATE_ERROR + " (" + order.Item + ")");
+                    Utils.Utils.WriteLog(view,  AlarmMessage.AMES_MAP_CREATE_ERROR + " (" + order.No + ")");
                 }
 
             }
-
-            if (alarmMessage != "")
-            {
-                AddAlarm(order, alarmMessage);
-            }
-
             var logMes = order.Department + " " + order.No + " " + order.Item + " " + order.Date + " " +
                          order.Quantity + " ";
 
@@ -168,18 +191,31 @@ namespace AutoBlankMapBuilder.Models
                 if (MainInfoAppend(backupDate, order, waPass, waFail, dstDir) != CommonConstants.ECODE_OK)
                 {
                     logMes = logMes.Replace("作成済", "作成済（データベース書込失敗 - main）");
+                    alarmMessage += AlarmMessage.AMES_DB_ERROR;
+                    Utils.Utils.WriteLog(view,  AlarmMessage.AMES_DB_ERROR + " (" + order.No + ")");
                 }
                 else
                 {
                     if (WaMainInfoAppend(backupDate, order, waPass, waFail, dstDir) != CommonConstants.ECODE_OK)
                     {
                         logMes = logMes.Replace("作成済", "作成済（データベース書込失敗 - wamain）");
+                        alarmMessage += AlarmMessage.AMES_DB_ERROR;
+                        Utils.Utils.WriteLog(view,  AlarmMessage.AMES_DB_ERROR + " (" + order.No + ")");
                     }
                 }
             }
             else
             {
                 logMes += alarmMessage;
+            }
+
+            if (alarmMessage != "")
+            {
+                AddAlarm(order, alarmMessage);
+            }
+            else
+            {
+                Utils.Utils.WriteLog(view,  "投入MAP作成成功 (" + order.No + ")");
             }
 
             commonFunc.PutLog(logMes);

@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using AutoBlankMapBuilder.Utils;
 
 namespace AutoBlankMapBuilder.Views
 {
@@ -28,6 +29,10 @@ namespace AutoBlankMapBuilder.Views
             {
                 Utils.Utils.WriteLog(this, "起動時ブランクMAP作成");
                 Execute();
+                if (WindowManager.IsOpenWindow<AlarmView>() == false)
+                {
+                    Application.Current.Shutdown();
+                }
             }
         }
 
@@ -50,8 +55,9 @@ namespace AutoBlankMapBuilder.Views
                 Utils.Utils.WriteLog(this, "定時ブランクMAP作成");
                 Execute();
                 this._timer.Start();
+                executeTime = GetExecuteTime();
+                dt = executeTime - DateTime.Now;
             }
-            executeTime = GetExecuteTime();
             this.LabelTimer.Content = "次回実行時刻: " + executeTime.ToString("MM/dd HH:mm") + " (" + ((int)(dt.TotalHours)).ToString("D2") + ":" + dt.Minutes.ToString("D2") + " 後)";
         }
 
@@ -85,6 +91,7 @@ namespace AutoBlankMapBuilder.Views
             Utils.Utils.WriteLog(this, "設定変更画面");
             ConfigView view = new ConfigView(cfg);
             view.ShowDialog();
+            executeTime = GetExecuteTime();
         }
 
         private void Button2_OnClick(object sender, RoutedEventArgs e)

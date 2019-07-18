@@ -12,29 +12,39 @@ namespace AutoBlankMapBuilder.Utils
 {
     public static class Utils
     {
-        public static bool SearchFolder(string path, string folderName)
+        public static int SearchFolder(string path, string folderName)
         {
             // 機種フォルダがない場合
             // とりあえずフォルダ作成
             if (Directory.Exists(path) == false)
             {
                 Directory.CreateDirectory(path);
-                return false;
+                return 0;
             }
             
             string name = "";
-            var subFolders = Directory.GetDirectories(path, "*", SearchOption.AllDirectories);
+            
+            string[] subFolders;
+
+            try
+            {
+                subFolders = Directory.GetDirectories(path, "*", SearchOption.AllDirectories);
+            }
+            catch
+            {
+                return -1;
+            }
 
             foreach (var folder in subFolders)
             {
                 name = folder.Substring(folder.LastIndexOf(@"\") + 1, folder.Length - folder.LastIndexOf(@"\") - 1);
                 if (name == folderName)
                 {
-                    return true;
+                    return 1;
                 }
             }
 
-            return false;
+            return 0;
         }
 
         public static List<Order> GetOrderList(string fileName)
