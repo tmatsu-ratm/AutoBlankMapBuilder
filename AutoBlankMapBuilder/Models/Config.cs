@@ -17,6 +17,7 @@ namespace AutoBlankMapBuilder.Models
         public string NewDataDir { get; set; }
         public string BlankMapDir { get; set; }
         public string LogDir { get; set; }
+        public string ListDir { get; set; }
 
         // DB
         public string MapBackupDb { get; set; }
@@ -29,6 +30,8 @@ namespace AutoBlankMapBuilder.Models
         public string ExecuteTime { get; set; }
 
         public string OrderList { get; set; }
+        public string ASICList { get; set; }
+        public string NEXTList { get; set; }
 
         public string filePath { get; set; }
 
@@ -69,8 +72,10 @@ namespace AutoBlankMapBuilder.Models
                 NewDataDir = server.Element("NewDataDirectory").Value;
                 BlankMapDir = server.Element("BlankMap").Value;
                 LogDir = server.Element("Log").Value;
-                var file = doc.Element("Config").Element("File");
-                OrderList = file.Element("OrderList").Value;
+                ListDir = server.Element("List").Value;
+                OrderList = ListDir + "\\" + CommonConstants.T_LIST;
+                ASICList = ListDir + "\\" + CommonConstants.T_ASIC;
+                NEXTList = ListDir + "\\" + CommonConstants.T_NEXT;
                 var db = doc.Element("Config").Element("DB").Element("MAP_BACKUP");
                 var conString = db.Element("ConnectionStrings").Value;
                 MapBackupDb = conString;
@@ -123,8 +128,7 @@ namespace AutoBlankMapBuilder.Models
                 server.Element("NewDataDirectory").Value = view.TBlockNewFolder.Text;
                 server.Element("BlankMap").Value = view.TBlockMapFolder.Text;
                 server.Element("Log").Value = view.TBlockLogFolder.Text;
-                var file = doc.Element("Config").Element("File");
-                file.Element("OrderList").Value = view.TBlockOrderList.Text;
+                server.Element("List").Value = view.TBlockOrderList.Text;
                 var application = doc.Element("Config").Element("Application");
                 application.Element("ExecuteTime").Value = view.TimePicker.Value.ToString("HH:mm");
 
@@ -153,12 +157,11 @@ namespace AutoBlankMapBuilder.Models
                             new XText("C:\\TMP\\BLANK_MAP")),
                         new XElement("Log",
                             new XAttribute("Comment", "マップ作成ログ保管フォルダ"),
-                            new XText("C:\\TMP\\LOG"))
+                            new XText("C:\\TMP\\LOG")),
+                        new XElement("List",
+                            new XAttribute("Comment", "リスト保管フォルダ"),
+                            new XText("C*\\TMP"))
                         ),
-                    new XElement("File",
-                        new XElement("OrderList",
-                            new XAttribute("Comment", "投入リスト"),
-                            new XText("C:\\TMP\\TOUNYU\\T_LIST.xlsx"))),
                     new XElement("DB",
                         new XElement("MAP_BACKUP",
                             new XElement("ConnectionStrings",

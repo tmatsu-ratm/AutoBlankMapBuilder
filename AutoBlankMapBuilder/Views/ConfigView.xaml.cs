@@ -34,7 +34,7 @@ namespace AutoBlankMapBuilder.Views
             TBlockAllFolder.Text = cfg.AllDataDir;
             TBlockNewFolder.Text = cfg.NewDataDir;
             TBlockMapFolder.Text = cfg.BlankMapDir;
-            TBlockOrderList.Text = cfg.OrderList;
+            TBlockOrderList.Text = cfg.ListDir;
             TBlockLogFolder.Text = cfg.LogDir;
             TBlockDbUsr.Text = cfg.DbUser;
             TBlockDbPw.Text = new string('*', cfg.DbPwd.Length);
@@ -46,13 +46,10 @@ namespace AutoBlankMapBuilder.Views
 
         private void Button1_OnClick(object sender, RoutedEventArgs e)
         {
-            var dlg = new OpenFileDialog();
-
-            dlg.Filter = "Excelファイル (*.xlsx)|*.xlsx";
-
-            if (dlg.ShowDialog() == true)
+            var folderName = GetFolderName();
+            if (folderName.Length > 0)
             {
-                TBlockOrderList.Text = dlg.FileName;
+                TBlockOrderList.Text = folderName;
             }
         }
 

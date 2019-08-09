@@ -25,7 +25,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid Row="0" Column="0" Margin="2">
-                <Label Content="投入リスト" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White" />
+                <Label Content="リストフォルダ" VerticalAlignment="Center" BorderBrush="DimGray" BorderThickness="1" Background="White" />
             </Grid>
             <Grid Row="0" Column="1" Background="Yellow" Margin="2">
                 <TextBlock x:Name="TBlockOrderList" VerticalAlignment="Center" Margin="10,0,0,0" />

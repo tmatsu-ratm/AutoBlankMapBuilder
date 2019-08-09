@@ -17,6 +17,9 @@ namespace AutoBlankMapBuilder
         public static readonly uint INI_PASSCOUNT = 0;
         public static readonly int INI_MAP_COUNT = 0;
 
+        public static readonly string T_LIST = "T_LIST.xlsx";
+        public static readonly string T_ASIC = "T_ASIC.xlsx";
+        public static readonly string T_NEXT = "T_NEXT.xlsx";
 
         public static readonly string EXPLORER = "EXPLORER.EXE";
 
