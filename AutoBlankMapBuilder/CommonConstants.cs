@@ -41,6 +41,7 @@ namespace AutoBlankMapBuilder
     public static class AlarmMessage
     {
         public static readonly string[] AMES_BLANK_MAP_UNKNOWN = { "ブランクMAP登録なし", "MAP登録なし", "ブランクMAP登録なし" };
+        public static readonly string[] AMES_BLANK_MAP_UNKNOWN2 = { "", "指定MAPファイルなし", "" };
         public static readonly string AMES_INS_ALL_EXIST = "INS_ALLあり";
         public static readonly string AMES_INS_NEW_EXIST = "INS_NEWあり";
         public static readonly string AMES_NETWORK_ERROR = "ネットワークエラー";

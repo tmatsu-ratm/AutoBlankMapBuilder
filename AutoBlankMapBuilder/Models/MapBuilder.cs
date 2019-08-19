@@ -84,7 +84,6 @@ namespace AutoBlankMapBuilder.Models
             var mode = order.Mode;
 
             // MAPフォルダ特定
-
             if (mode == (int) CommonConstants.ListMode.Asic)
             {
                 srcDir = order.BackupPath;
@@ -99,6 +98,17 @@ namespace AutoBlankMapBuilder.Models
                 canCreate = false;
                 alarmMessage += AlarmMessage.AMES_BLANK_MAP_UNKNOWN[mode];
                 Utils.Utils.WriteLog(view,  AlarmMessage.AMES_BLANK_MAP_UNKNOWN[mode] + " (" + order.No + ")");
+            }
+
+            // MAPファイル構成確認
+            if (canCreate && mode == (int) CommonConstants.ListMode.Asic)
+            {
+                if (VerifyMapfile(srcDir, order.WaferList) == false)
+                {
+                    canCreate = false;
+                    alarmMessage += AlarmMessage.AMES_BLANK_MAP_UNKNOWN2[mode];
+                    Utils.Utils.WriteLog(view, AlarmMessage.AMES_BLANK_MAP_UNKNOWN2[mode] + " (" + order.No + ")");
+                }
             }
 
             // INS_ALL保管先確認
@@ -442,6 +452,20 @@ namespace AutoBlankMapBuilder.Models
                 Quantity = order.Quantity,
                 Result = result
             });
+        }
+
+        private bool VerifyMapfile(string folderPath, bool[] waferList)
+        {
+            foreach (var w in waferList.Select((v, i) => new { v, i }))
+            {
+                if (w.v)
+                {
+                    var fileName = folderPath + "\\" + CommonConstants.WAFER_DAT_STRING + string.Format("{0:00}", (w.i + 1)) +
+                                   ".dat";
+                    if (File.Exists(fileName) == false) return false;
+                }
+            }
+            return true;
         }
 
     }
