@@ -74,19 +74,31 @@ namespace AutoBlankMapBuilder.Models
 
         public void CreateMap(Order order)
         {
+            var srcDir = "";
             var alarmMessage = "";
             var backupPath = "";
             var canCreate = true;
             int waPass = 0;
             int waFail = 0;
 
-            // 機種フォルダ特定
-            var srcDir = cfg.BlankMapDir + "\\" + order.Item;
+            var mode = order.Mode;
+
+            // MAPフォルダ特定
+
+            if (mode == (int) CommonConstants.ListMode.Asic)
+            {
+                srcDir = order.BackupPath;
+            }
+            else
+            {
+                srcDir = cfg.BlankMapDir + "\\" + order.Item;
+            }
+
             if (Directory.Exists(srcDir) == false)
             {
                 canCreate = false;
-                alarmMessage += AlarmMessage.AMES_BLANK_MAP_UNKNOWN;
-                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_BLANK_MAP_UNKNOWN + " (" + order.No + ")");
+                alarmMessage += AlarmMessage.AMES_BLANK_MAP_UNKNOWN[mode];
+                Utils.Utils.WriteLog(view,  AlarmMessage.AMES_BLANK_MAP_UNKNOWN[mode] + " (" + order.No + ")");
             }
 
             // INS_ALL保管先確認

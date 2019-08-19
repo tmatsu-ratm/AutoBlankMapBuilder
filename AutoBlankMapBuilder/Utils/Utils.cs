@@ -7,6 +7,7 @@ using System.Windows;
 using OfficeOpenXml;
 using AutoBlankMapBuilder.Models;
 using AutoBlankMapBuilder.Views;
+using OfficeOpenXml.ConditionalFormatting;
 
 namespace AutoBlankMapBuilder.Utils
 {
@@ -71,11 +72,34 @@ namespace AutoBlankMapBuilder.Utils
                             break;
                         }
                         var order = new Order();
-                        order.Department = sheet.Cells[i, 1].Text;
-                        order.No = sheet.Cells[i, 2].Text;
-                        order.Item = sheet.Cells[i, 3].Text;
-                        order.Date = sheet.Cells[i, 4].Text;
-                        order.Quantity = int.Parse(sheet.Cells[i, 5].Text);
+                        var listName = Path.GetFileName(fileName);
+
+                        switch (listName)
+                        {
+                            case "T_LIST.xlsx":
+                                order.Department = sheet.Cells[i, 1].Text;
+                                order.No = sheet.Cells[i, 2].Text;
+                                order.Item = sheet.Cells[i, 3].Text;
+                                order.Date = sheet.Cells[i, 4].Text;
+                                order.Quantity = int.Parse(sheet.Cells[i, 5].Text);
+                                order.WaferList = GetWaferList(order.Quantity);
+                                order.Mode = (int)CommonConstants.ListMode.Blank;
+                                break;
+                            case "T_ASIC.xlsx":
+                                order.No = sheet.Cells[i, 7].Text;
+                                order.Item = sheet.Cells[i, 6].Text;
+                                order.WaferList = GetWaferList(sheet.Cells[i, 8].Text);
+                                order.BackupPath = sheet.Cells[i, 4].Text;
+                                order.Mode = (int)CommonConstants.ListMode.Asic;
+                                break;
+                            case "T_NEXT.xlsx":
+                                order.No = sheet.Cells[i, 2].Text;
+                                order.Item = sheet.Cells[i, 1].Text;
+                                order.WaferList = GetWaferList(sheet.Cells[i, 4].Text);
+                                order.Mode = (int)CommonConstants.ListMode.Next;
+                                break;
+                        }
+
                         list.Add(order);
                         i++;
                     }
@@ -136,6 +160,31 @@ namespace AutoBlankMapBuilder.Utils
           
             view.LogText.AppendText("[" + DateTime.Now.ToString()+"] " + text + "\r\n");
             view.LogText.ScrollToEnd();
+        }
+
+        public static bool[] GetWaferList(string listString)
+        {
+            var waferList = new bool[CommonConstants.WAFER_MAX];
+
+            foreach (var w in listString.Select((v,i) => new {v, i}))
+            {
+                if (w.v == '1') waferList[w.i] = true;
+            }
+
+            return waferList;
+        }
+
+        public static bool[] GetWaferList(int waferCount)
+        {
+            var waferList = new bool[CommonConstants.WAFER_MAX];
+
+            for (int i = 0; i < CommonConstants.WAFER_MAX; i++)
+            {
+                if (waferCount >= (i + 1)) waferList[i] = true;
+                else break;
+            }
+
+            return waferList;
         }
     }
 }

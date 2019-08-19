@@ -12,5 +12,8 @@ namespace AutoBlankMapBuilder.Models
         public string Item { get; set; }        //  KISYU
         public string Date { get; set; }        //  投入日
         public int Quantity { get; set; }       //  投入数量主
+        public bool[] WaferList { get; set; }   //  ウエハリスト
+        public string BackupPath { get; set; }  //  バックアップパス (ASICMAP用)
+        public int Mode { get; set; }           //  Listの種類
     }
 }
