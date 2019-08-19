@@ -356,6 +356,93 @@ namespace AutoBlankMapBuilder.Models
             return CommonConstants.ECODE_OK;
         }
 
+        public int CreateAsicMapFile(string srcDir, string dstDir, string typeName, string lotNo, bool[]waferList, string explorerPath, out int waPass, out int waFail)
+        {
+            int count = 0;
+            string srcFile = "";
+            string dstFile = "";
+            string errMsg = "";
+            LotDatInformation lotDatInfo = null;
+            WaferMap waferData = null;
+            waPass = 0;
+            waFail = 0;
+            var waPassList = new int[CommonConstants.WAFER_MAX];
+            var waFailList = new int[CommonConstants.WAFER_MAX];
+            var passCount = 0;
+            var failCount = 0;
+            var testCount = 0;
+
+            try
+            {
+                // LOT.DAT読込
+                srcFile = srcDir + "\\" + CommonConstants.LOT_DAT_STRING;
+                var rc = fileAccessClass.LotDataReadToClass(srcFile, ref lotDatInfo, ref errMsg);
+                if (rc != CommonConstants.ECODE_OK)
+                {
+                    Utils.Utils.WriteLog(view, "LOT.DAT読込失敗 (" + typeName + ")");
+                    return rc;
+                }
+
+                // コピー先のファイルを削除
+                fileCopyClass.LotDatFileDelete(dstDir);
+
+                foreach (var w in waferList.Select((v, j) => new { v, j }))
+                {
+                    if (w.v)
+                    {
+                        srcFile = srcDir + "\\" + CommonConstants.WAFER_DAT_STRING +
+                                  string.Format("{0:00}", (w.j + 1)) + ".dat";
+
+                        rc = fileAccessClass.WaferDataReadToClass(srcFile, ref lotDatInfo, ref waferData, false, ref errMsg);
+
+                        if (rc != CommonConstants.ECODE_OK)
+                        {
+                            Utils.Utils.WriteLog(view, "Error : WaferDataReadToClass");
+                            return rc;
+                        }
+
+                        if (Directory.Exists(dstDir) == false)
+                        {
+                            Directory.CreateDirectory(dstDir);
+                        }
+
+                        dstFile = dstDir + "\\" + CommonConstants.WAFER_DAT_STRING + string.Format("{0:00}", (w.j + 1)) +
+                                  ".dat";
+
+                        File.Copy(srcFile, dstFile);
+
+                        // ファイルの情報を更新
+                        fileAccessClass.WaDataUpDate(dstFile, (w.j + 1), ref errMsg);
+                        waPassList[w.j] = waferData.wafer_test_sum_info.pass_total;
+                        waFailList[w.j] = waferData.wafer_test_sum_info.fail_total;
+
+                        passCount += waferData.wafer_test_sum_info.pass_total;
+                        failCount += waferData.wafer_test_sum_info.fail_total;
+                        testCount += waferData.wafer_test_sum_info.test_total;
+                    }
+                }
+
+                // LOT.DATのコピー
+                srcFile = srcDir + "\\" + CommonConstants.LOT_DAT_STRING;
+                dstFile = dstDir + "\\" + CommonConstants.LOT_DAT_STRING;
+                File.Copy(srcFile, dstFile);
+
+                rc = fileAccessClass.LotData_UpdateSomeInfo(dstFile, typeName, lotNo, waferList, passCount, failCount,
+                    testCount, ref errMsg);
+                if (rc != CommonConstants.ECODE_OK)
+                {
+                    Utils.Utils.WriteLog(view, "Error : LotData_UpdateSomeInfo");
+                    return rc;
+                }
+            }
+            catch (Exception ex)
+            {
+                return CommonConstants.ECODE_ERROR;
+            }
+
+            return CommonConstants.ECODE_OK;
+        }
+
         private int MainInfoAppend(DateTime dt, Order order, int waPass, int waFail, string dstDir)
         {
             String errMsg = "";
