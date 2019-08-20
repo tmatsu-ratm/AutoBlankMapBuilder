@@ -9,9 +9,9 @@ namespace AutoBlankMapBuilder
 
         public static readonly string LOT_DAT_STRING = "LOT.DAT";
         public static readonly string WAFER_DAT_STRING = "W-NO-";
-        public static readonly string INS_ALL_FOLDER = "DATA000_投入";
-        public static readonly string BACKUP_PC_NAME = "AUTO_MAP";
-        public static readonly string OPE_NAME = "自動作成";
+        public static readonly string[] INS_ALL_FOLDER = { "DATA000_投入", "DATA000_投入ASIC", "DATA000_投入NEXT" };
+        public static readonly string[] BACKUP_PC_NAME = { "AUTO_MAP" , "ASIC_MAP" , "NEXT_MAP" };
+        public static readonly string[] OPE_NAME = {"自動作成", "ASIC作成", "NEXT作成"};
         public static readonly string LAY_NO = "AUTO";
         public static readonly int OPE_SEQ = 0;
         public static readonly uint INI_PASSCOUNT = 0;

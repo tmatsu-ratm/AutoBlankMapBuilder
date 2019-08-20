@@ -78,8 +78,10 @@ namespace AutoBlankMapBuilder.Models
             var alarmMessage = "";
             var backupPath = "";
             var canCreate = true;
-            int waPass = 0;
-            int waFail = 0;
+            int waPassTotal = 0;
+            int waFailTotal = 0;
+            int[] waPassList = new int[CommonConstants.WAFER_MAX];
+            int[] waFailList = new int[CommonConstants.WAFER_MAX];
 
             var mode = order.Mode;
 
@@ -165,13 +167,21 @@ namespace AutoBlankMapBuilder.Models
             {
                 // MAPファイル作成
                 var dstDir = CommonConstants.TMP_PATH;
-                var rc = CreateMapFile(srcDir, dstDir, order.Item, order.No, order.Quantity, CommonConstants.EXPLORER, out waPass, out waFail);
+                var rc = -1;
+                if (mode == (int) CommonConstants.ListMode.Asic)
+                {
+                    rc = CreateAsicMapFile(srcDir, dstDir, order.Item, order.No, order.WaferList, CommonConstants.EXPLORER, out waPassList, out waFailList, out waPassTotal, out waFailTotal);
+                }
+                else
+                {
+                    rc = CreateBlankMapFile(srcDir, dstDir, order.Item, order.No, order.WaferList, CommonConstants.EXPLORER, out waPassList, out waFailList, out waPassTotal, out waFailTotal);
+                }
 
                 if (rc == CommonConstants.ECODE_OK)
                 {
                     // INS_ALLにコピー
                     srcDir = dstDir;
-                    dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
+                    dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER[mode];
                     backupPath = dstDir;
                     rc = fileCopyClass.CopyDirectory(srcDir, dstDir, false, true);
                     if (rc != CommonConstants.ECODE_OK)
@@ -204,13 +214,13 @@ namespace AutoBlankMapBuilder.Models
 
             if (alarmMessage == "")
             {
-                logMes += "作成済 " + DateTime.Now.ToString("yyyy/MM/dd HH:mm " ) + waPass.ToString() + " " + waFail.ToString() + " " + backupPath;
+                logMes += "作成済 " + DateTime.Now.ToString("yyyy/MM/dd HH:mm " ) + (waPassTotal / order.Quantity).ToString() + " " + (waFailTotal / order.Quantity).ToString() + " " + backupPath;
 
                 // MAP保管履歴書込
                 //  mainとwamainの"backup_date"を同値にする
                 var backupDate = DateTime.Now;
                 var dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
-                if (MainInfoAppend(backupDate, order, waPass, waFail, dstDir) != CommonConstants.ECODE_OK)
+                if (MainInfoAppend(backupDate, order, waPassTotal, waFailTotal, dstDir) != CommonConstants.ECODE_OK)
                 {
                     logMes = logMes.Replace("作成済", "作成済（データベース書込失敗 - main）");
                     alarmMessage += AlarmMessage.AMES_DB_ERROR;
@@ -218,7 +228,7 @@ namespace AutoBlankMapBuilder.Models
                 }
                 else
                 {
-                    if (WaMainInfoAppend(backupDate, order, waPass, waFail, dstDir) != CommonConstants.ECODE_OK)
+                    if (WaMainInfoAppend(backupDate, order, waPassList, waFailList, dstDir) != CommonConstants.ECODE_OK)
                     {
                         logMes = logMes.Replace("作成済", "作成済（データベース書込失敗 - wamain）");
                         alarmMessage += AlarmMessage.AMES_DB_ERROR;
@@ -356,7 +366,107 @@ namespace AutoBlankMapBuilder.Models
             return CommonConstants.ECODE_OK;
         }
 
-        public int CreateAsicMapFile(string srcDir, string dstDir, string typeName, string lotNo, bool[]waferList, string explorerPath, out int waPass, out int waFail)
+        public int CreateBlankMapFile(string srcDir, string dstDir, string typeName, string lotNo, bool[] waferList, string explorerPath, out int[] waPassList, out int[] waFailList, out int passCount, out int failCount)
+        {
+            int i;
+            int count = 0;
+            string srcFile = "";
+            string dstFile = "";
+            string errMsg = "";
+            LotDatInformation lotDatInfo = null;
+            WaferMap waferData = null;
+            waPassList = new int[CommonConstants.WAFER_MAX];
+            waFailList = new int[CommonConstants.WAFER_MAX];
+            passCount = 0;
+            failCount = 0;
+            var testCount = 0;
+
+            try
+            {
+                // LOT.DAT読込
+                srcFile = srcDir + "\\" + CommonConstants.LOT_DAT_STRING;
+                var rc = fileAccessClass.LotDataReadToClass(srcFile, ref lotDatInfo, ref errMsg);
+                if (rc != CommonConstants.ECODE_OK)
+                {
+                    Utils.Utils.WriteLog(view, "LOT.DAT読込失敗 (" + typeName + ")");
+                    return rc;
+                }
+
+                // コピー先のファイルを削除
+                fileCopyClass.LotDatFileDelete(dstDir);
+
+                // WA-**.DATの検索
+                for (i = 0; i < CommonConstants.WAFER_MAX; i++)
+                {
+                    srcFile = srcDir + "\\" + CommonConstants.WAFER_DAT_STRING + string.Format("{0:00}", (i + 1)) +
+                              ".dat";
+                    if (File.Exists(srcFile) == true)
+                    {
+                        break;
+                    }
+                }
+                if (i >= CommonConstants.WAFER_MAX)
+                {
+                    Utils.Utils.WriteLog(view, "WA-xx.datが存在しません (" + typeName + ")");
+                    return CommonConstants.ECODE_ERROR;
+                }
+                // 未使用??
+                var versionType = fileAccessClass.GetVersionType(srcDir + "\\" + CommonConstants.LOT_DAT_STRING);
+
+                rc = fileAccessClass.WaferDataReadToClass(srcFile, ref lotDatInfo, ref waferData, false, ref errMsg);
+                if (rc != CommonConstants.ECODE_OK)
+                {
+                    Utils.Utils.WriteLog(view, "Error : WaferDataReadToClass");
+                    return rc;
+                }
+
+                if (Directory.Exists(dstDir) == false)
+                {
+                    Directory.CreateDirectory(dstDir);
+                }
+
+                foreach (var w in waferList.Select((v, j) => new {v, j}))
+                {
+                    if (w.v)
+                    {
+                        dstFile = dstDir + "\\" + CommonConstants.WAFER_DAT_STRING + string.Format("{0:00}", w.j + 1) +
+                                  ".dat";
+
+                        File.Copy(srcFile,dstFile);
+
+                        // ファイルの情報を更新
+                        fileAccessClass.WaDataUpDate(dstFile, (w.j + 1), ref errMsg);
+                        waPassList[w.j] = waferData.wafer_test_sum_info.pass_total;
+                        waFailList[w.j] = waferData.wafer_test_sum_info.fail_total;
+
+                        passCount += waferData.wafer_test_sum_info.pass_total;
+                        failCount += waferData.wafer_test_sum_info.fail_total;
+                        testCount += waferData.wafer_test_sum_info.test_total;
+                    }
+                }
+
+                // LOT.DATのコピー
+                srcFile = srcDir + "\\" + CommonConstants.LOT_DAT_STRING;
+                dstFile = dstDir + "\\" + CommonConstants.LOT_DAT_STRING;
+                File.Copy(srcFile, dstFile);
+
+                rc = fileAccessClass.LotData_UpdateSomeInfo(dstFile, typeName.Substring(0,12), lotNo, waferList, passCount, failCount,
+                    testCount, ref errMsg);
+                if (rc != CommonConstants.ECODE_OK)
+                {
+                    Utils.Utils.WriteLog(view, "Error : LotData_UpdateSomeInfo");
+                    return rc;
+                }
+            }
+            catch (Exception ex)
+            {
+                return CommonConstants.ECODE_ERROR;
+            }
+
+            return CommonConstants.ECODE_OK;
+        }
+
+        public int CreateAsicMapFile(string srcDir, string dstDir, string typeName, string lotNo, bool[]waferList, string explorerPath, out int[] waPassList, out int[] waFailList, out int passCount, out int failCount)
         {
             int count = 0;
             string srcFile = "";
@@ -364,12 +474,10 @@ namespace AutoBlankMapBuilder.Models
             string errMsg = "";
             LotDatInformation lotDatInfo = null;
             WaferMap waferData = null;
-            waPass = 0;
-            waFail = 0;
-            var waPassList = new int[CommonConstants.WAFER_MAX];
-            var waFailList = new int[CommonConstants.WAFER_MAX];
-            var passCount = 0;
-            var failCount = 0;
+            waPassList = new int[CommonConstants.WAFER_MAX];
+            waFailList = new int[CommonConstants.WAFER_MAX];
+            passCount = 0;
+            failCount = 0;
             var testCount = 0;
 
             try
@@ -406,7 +514,7 @@ namespace AutoBlankMapBuilder.Models
                             Directory.CreateDirectory(dstDir);
                         }
 
-                        dstFile = dstDir + "\\" + CommonConstants.WAFER_DAT_STRING + string.Format("{0:00}", (w.j + 1)) +
+                        dstFile = dstDir + "\\" + CommonConstants.WAFER_DAT_STRING + string.Format("{0:00}", w.j + 1) +
                                   ".dat";
 
                         File.Copy(srcFile, dstFile);
@@ -450,6 +558,7 @@ namespace AutoBlankMapBuilder.Models
             var errCode = CommonConstants.ECODE_OK;
             var param = new MainTblAppendParam();
             FileInfo fInfo = null;
+            var mode = order.Mode;
 
             try
             {
@@ -464,15 +573,15 @@ namespace AutoBlankMapBuilder.Models
             }
 
             param.backup_date = dt;
-            param.backup_pc = CommonConstants.BACKUP_PC_NAME;
+            param.backup_pc = CommonConstants.BACKUP_PC_NAME[mode];
             param.type_name = order.Item;
             param.lot_name = order.No;
-            param.pass_chip_count = waPass * order.Quantity;
-            param.ng_chip_count = waFail * order.Quantity;
+            param.pass_chip_count = waPass;
+            param.ng_chip_count = waFail;
             param.map_count = order.Quantity;
             param.send_flag = true;
             param.backup_path = dstDir;
-            param.OPE_NAME = CommonConstants.OPE_NAME;
+            param.OPE_NAME = CommonConstants.OPE_NAME[mode];
             param.OPE_SEQ = CommonConstants.OPE_SEQ;
             param.LAY_NO = CommonConstants.LAY_NO;
             param.INI_PASSCOUNT = CommonConstants.INI_PASSCOUNT;
@@ -493,29 +602,32 @@ namespace AutoBlankMapBuilder.Models
 
         }
 
-        private int WaMainInfoAppend(DateTime dt, Order order, int waPass, int waFail, string dstDir)
+        private int WaMainInfoAppend(DateTime dt, Order order, int[] waPassList, int[] waFailList, string dstDir)
         {
             String errMsg = "";
             var errCode = CommonConstants.ECODE_OK;
             var param = new WaMainTblAppendParam();
+            var mode = order.Mode;
 
             try
             {
-                for (var i = 0; i < order.Quantity; i++)
+                foreach (var w in order.WaferList.Select((v, i) => new {v,i}))
                 {
-                    param.backup_date = dt;
-                    param.backup_pc = CommonConstants.BACKUP_PC_NAME;
-                    param.type_name = order.Item;
-                    param.lot_name = order.No;
-                    param.pass_chip_count = waPass;
-                    param.ng_chip_count = waFail;
-                    param.send_flag = true;
-                    param.backup_path = dstDir;
-
-                    if (sqlFunc.WaMainInfoAppend(param, i + 1, ref errMsg) != CommonConstants.ECODE_OK)
+                    if (w.v)
                     {
-                        errCode = CommonConstants.ECODE_ERROR;
-                        break;
+                        param.backup_date = dt;
+                        param.backup_pc = CommonConstants.BACKUP_PC_NAME[mode];
+                        param.type_name = order.Item;
+                        param.lot_name = order.No;
+                        param.pass_chip_count = waPassList[w.i];
+                        param.ng_chip_count = waFailList[w.i];
+                        param.send_flag = true;
+                        param.backup_path = dstDir;
+                        if (sqlFunc.WaMainInfoAppend(param, w.i + 1, ref errMsg) != CommonConstants.ECODE_OK)
+                        {
+                            errCode = CommonConstants.ECODE_ERROR;
+                            break;
+                        }
                     }
                 }
             }

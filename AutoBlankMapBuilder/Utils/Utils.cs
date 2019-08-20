@@ -88,6 +88,7 @@ namespace AutoBlankMapBuilder.Utils
                             case "T_ASIC.xlsx":
                                 order.No = sheet.Cells[i, 7].Text;
                                 order.Item = sheet.Cells[i, 6].Text;
+                                order.Quantity = int.Parse(sheet.Cells[i, 9].Text);
                                 order.WaferList = GetWaferList(sheet.Cells[i, 8].Text);
                                 order.BackupPath = sheet.Cells[i, 4].Text;
                                 order.Mode = (int)CommonConstants.ListMode.Asic;
@@ -95,6 +96,7 @@ namespace AutoBlankMapBuilder.Utils
                             case "T_NEXT.xlsx":
                                 order.No = sheet.Cells[i, 2].Text;
                                 order.Item = sheet.Cells[i, 1].Text;
+                                order.Quantity = int.Parse(sheet.Cells[i, 5].Text);
                                 order.WaferList = GetWaferList(sheet.Cells[i, 4].Text);
                                 order.Mode = (int)CommonConstants.ListMode.Next;
                                 break;
