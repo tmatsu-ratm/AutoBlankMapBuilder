@@ -160,7 +160,7 @@ namespace AutoBlankMapBuilder.Models
                             new XText("C:\\TMP\\LOG")),
                         new XElement("List",
                             new XAttribute("Comment", "リスト保管フォルダ"),
-                            new XText("C*\\TMP"))
+                            new XText("C:\\TMP"))
                         ),
                     new XElement("DB",
                         new XElement("MAP_BACKUP",

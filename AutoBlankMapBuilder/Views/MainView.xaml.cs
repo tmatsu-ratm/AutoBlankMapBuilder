@@ -1,7 +1,9 @@
 ﻿using AutoBlankMapBuilder.Models;
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using AutoBlankMapBuilder.Utils;
 
@@ -104,7 +106,12 @@ namespace AutoBlankMapBuilder.Views
         {
             this.Cursor = Cursors.Wait;
             var builder = new MapBuilder(cfg, this);
-            builder.Process();
+            var listName = cfg.OrderList;
+            builder.Process(listName);
+            listName = cfg.ASICList;
+            if(File.Exists(listName)) builder.Process(listName);
+            listName = cfg.NEXTList;
+            if(File.Exists(listName)) builder.Process(listName);
             this.Cursor = null;
             executedTime = DateTime.Now;
             this.LabelTimer2.Content = "前回実行時間: " + executedTime.ToString("MM/dd HH:mm:ss");            

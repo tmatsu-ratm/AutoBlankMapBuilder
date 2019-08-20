@@ -33,10 +33,10 @@ namespace AutoBlankMapBuilder.Models
             sqlFunc.ConnectionStringMapBackup = cfg.MapBackupDb;
         }
 
-        public void Process()
+        public void Process(string listFile)
         {
             // List作成
-            var list = Utils.Utils.GetOrderList(cfg.OrderList);
+            var list = Utils.Utils.GetOrderList(listFile);
 
             if (list == null)
             {
@@ -219,7 +219,7 @@ namespace AutoBlankMapBuilder.Models
                 // MAP保管履歴書込
                 //  mainとwamainの"backup_date"を同値にする
                 var backupDate = DateTime.Now;
-                var dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER;
+                var dstDir = cfg.AllDataDir + "\\" + order.Item + "\\" + order.No + "\\" + CommonConstants.INS_ALL_FOLDER[mode];
                 if (MainInfoAppend(backupDate, order, waPassTotal, waFailTotal, dstDir) != CommonConstants.ECODE_OK)
                 {
                     logMes = logMes.Replace("作成済", "作成済（データベース書込失敗 - main）");
@@ -450,7 +450,15 @@ namespace AutoBlankMapBuilder.Models
                 dstFile = dstDir + "\\" + CommonConstants.LOT_DAT_STRING;
                 File.Copy(srcFile, dstFile);
 
-                rc = fileAccessClass.LotData_UpdateSomeInfo(dstFile, typeName.Substring(0,12), lotNo, waferList, passCount, failCount,
+                string newTypeName = "";
+
+                if (typeName.Length > 12)
+                {
+                    newTypeName = typeName.Substring(0, 12);
+                }
+                else newTypeName = typeName;
+
+                rc = fileAccessClass.LotData_UpdateSomeInfo(dstFile, newTypeName, lotNo, waferList, passCount, failCount,
                     testCount, ref errMsg);
                 if (rc != CommonConstants.ECODE_OK)
                 {
