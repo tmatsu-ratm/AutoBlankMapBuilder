@@ -29,12 +29,13 @@ namespace AutoBlankMapBuilder.Models
             fileCopyClass = new FileCopyClass(commonFunc);
             this.cfg = cfg;
             this.view = view;
-            alarmList = new List<AlarmInfo>();
+//            alarmList = new List<AlarmInfo>();
             sqlFunc.ConnectionStringMapBackup = cfg.MapBackupDb;
         }
 
         public void Process(string listFile)
         {
+            alarmList = new List<AlarmInfo>();
             // List作成
             var list = Utils.Utils.GetOrderList(listFile);
 
